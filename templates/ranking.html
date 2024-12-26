@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h1>Ranking dan Analisis</h1>
+
+<h3>Statistik Deskriptif:</h3>
+<pre>{{ stats }}</pre>
+
+<h3>Ranking Efisiency With PCA:</h3>
+<p>Silhouette Score:</p>
+<ul>
+    {% for item in leaderboardPCA %}
+    <li>
+        Rank {{ item.rank }}: {{ item.model }} (Score: {{ item.score }})
+    </li>
+    {% endfor %}
+</ul>
+<img src="{{ img_pathPCA }}" alt="PCA" class="img-fluid">
+
+<h3>Ranking Efisiency With LDA:</h3>
+<p>Silhouette Score:</p>
+<ul>
+    {% for item in leaderboardLDA %}
+    <li>
+        Rank {{ item.rank }}: {{ item.model }} (Score: {{ item.score }})
+    </li>
+    {% endfor %}
+</ul>
+<img src="{{ img_pathLDA }}" alt="LDA" class="img-fluid">
+
+{% endblock %}

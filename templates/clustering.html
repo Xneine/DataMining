@@ -1,0 +1,6 @@
+{% extends "base.html" %}
+{% block content %}
+<h3>Clustering Analysis</h3>
+<p>Silhouette Score: {{ silhouette_score }}</p>
+<img src="{{ img_path }}" alt="Insights Visualization" class="img-fluid">
+{% endblock %}
