@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 import pandas as pd
 from data_preprocessing import load_and_preprocess
-from analysis import energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda
+from analysis import energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization
 import os
 
 # Menangani masalah Matplotlib cache directory
@@ -29,6 +29,8 @@ def ranking():
 
     stats = descriptive_stats(DATA)
     
+    tabel = ranking_analysis_adjustments(DATA)
+    comparative_ranking_visualization(tabel)
     # Process PCA leaderboard
     leaderboardPCA = leaderboard_pca(DATA)
     if isinstance(leaderboardPCA, pd.DataFrame):
@@ -61,7 +63,9 @@ def ranking():
         leaderboardPCA=pca_items, 
         img_pathPCA='static/images/leaderboard_pca.png',
         leaderboardLDA=lda_items, 
-        img_pathLDA='static/images/leaderboard_lda.png'
+        img_pathLDA='static/images/leaderboard_lda.png',
+        img_pathVisual = 'static/images/comparative_ranking.png',
+        tabel = tabel
     )
 
 @app.route('/clustering')
