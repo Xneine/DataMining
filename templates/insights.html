@@ -1,14 +1,66 @@
-{% extends "base.html" %}
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <h3>Insights</h3>
-<p>Insight: {{ energy_score }}</p>
-<img src="{{ img_path }}" alt="Clustering Visualization" class="img-fluid">
 
-<p>Insight: {{ pca_distribution_analysis }}</p>
-<img src="{{ img_path2 }}" alt="Clustering Visualization" class="img-fluid">
-
-<p>Insight: {{ pca_user_type_analysis }}</p>
-<img src="{{ img_path3 }}" alt="Clustering Visualization" class="img-fluid">
-
-<p>Insight: {{ pca_summary_vehicle_model }}</p>
-{% endblock %}
+<div id="analysisCarousel" class="carousel slide" data-bs-ride="carousel">
+  <div class="carousel-inner">
+    <!-- Slide 1: Statistik Deskriptif -->
+    <div class="carousel-item active">
+      <div class="text-center">
+        <p>Insight: {{ energy_score }}</p>
+        <img
+          src="{{ img_path }}"
+          alt="Clustering Visualization"
+          class="img-fluid"
+        />
+      </div>
+    </div>
+    <!-- Slide 2: Statistik Deskriptif -->
+    <div class="carousel-item active">
+      <div class="text-center">
+        <p>Insight: {{ pca_distribution_analysis }}</p>
+        <img
+          src="{{ img_path2 }}"
+          alt="Clustering Visualization"
+          class="img-fluid"
+        />
+      </div>
+    </div>
+    <!-- Slide 3: Statistik Deskriptif -->
+    <div class="carousel-item active">
+      <div class="text-center">
+        <p>Insight: {{ pca_user_type_analysis }}</p>
+        <img
+          src="{{ img_path3 }}"
+          alt="Clustering Visualization"
+          class="img-fluid"
+        />
+      </div>
+    </div>
+    <!-- Slide 4: Statistik Deskriptif -->
+    <div class="carousel-item active">
+      <div class="text-center">
+        <p>Insight: {{ pca_summary_vehicle_model }}</p>
+      </div>
+    </div>
+    <!-- Carousel Controls -->
+    <button
+      class="carousel-control-prev"
+      type="button"
+      data-bs-target="#analysisCarousel"
+      data-bs-slide="prev"
+    >
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button
+      class="carousel-control-next"
+      type="button"
+      data-bs-target="#analysisCarousel"
+      data-bs-slide="next"
+    >
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
+  {% endblock %}
+</div>
