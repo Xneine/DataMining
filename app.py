@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 import pandas as pd
 from data_preprocessing import load_and_preprocess
-from analysis import pca_df_func, pca_user_type_analysis, pca_distribution_analysis, pca_summary_vehicle_model, energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization
+from analysis import pca_df_func, pca_user_type_analysis, pca_distribution_analysis, pca_summary_vehicle_model, energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization, lda_clustering_analysis,pca_clustering_analysis
 import os
 
 # Menangani masalah Matplotlib cache directory
@@ -73,8 +73,9 @@ def clustering():
     if DATA is None:
         return "Dataset tidak tersedia. Pastikan file CSV sudah diunduh dan diproses."
 
-    silhouette_score = clustering_analysis(DATA)
-    return render_template('clustering.html', silhouette_score=silhouette_score, img_path='static/images/clustering.png')
+    lda_data = lda_clustering_analysis(DATA)
+    pca_data = pca_clustering_analysis(DATA)
+    return render_template('clustering.html', lda_data=lda_data.to_dict(orient='records'),pca_data=pca_data.to_dict(orient='records'), img_path='static/images/lda_clustering.png', img_path2='static/images/pca_clustering.png')
 
 @app.route('/insights')
 def insights():

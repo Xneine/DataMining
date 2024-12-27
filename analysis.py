@@ -293,3 +293,143 @@ def pca_summary_vehicle_model(pca_df):
     pca_summary = pca_summary.reset_index()  # Mengubah index ke kolom
     pca_summary = pca_summary.sort_values('Vehicle Model', ascending=True)  # Mengurutkan kolom
     return pca_summary
+
+def lda_clustering_analysis(data):
+    logging.info("Starting LDA-based clustering analysis")
+
+    # Prepare data
+    data = data.copy()
+    numeric_columns = [
+        'Energy Consumed (kWh)', 'Charging Duration (hours)', 'Charging Rate (kW)',
+        'Distance Driven (since last charge) (km)', 'Temperature (°C)'
+    ]
+    target_column = 'Vehicle Model'
+
+    # Drop rows with missing values in required columns
+    data.dropna(subset=numeric_columns + [target_column], inplace=True)
+
+    # Standardize the data
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(data[numeric_columns])
+
+    # Apply LDA
+    lda = LDA(n_components=2)  # Reduce to 2 dimensions
+    X_lda = lda.fit_transform(X_scaled, data[target_column])
+
+    # Perform KMeans clustering
+    kmeans = KMeans(n_clusters=3, random_state=42)
+    data['Cluster'] = kmeans.fit_predict(X_lda)
+
+    # Map clusters to meaningful labels
+    cluster_labels = {
+        0: 'High Efficiency, Small Size',
+        1: 'Medium Efficiency, Large Size',
+        2: 'Low Efficiency, Medium Size'
+    }
+    data['Cluster Label'] = data['Cluster'].map(cluster_labels)
+
+    # Aggregate original data
+    aggregation_rules = {
+        "Energy Consumed (kWh)": "mean",
+        "Charging Duration (hours)": "mean",
+        "Charging Rate (kW)": "mean",
+        "Distance Driven (since last charge) (km)": "mean",
+        "Temperature (°C)": "mean"
+    }
+    aggregated_data = data.groupby("Vehicle Model").agg(aggregation_rules).reset_index()
+
+    # Merge aggregated data with clustering labels
+    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()
+    lda_data = pd.merge(aggregated_data, cluster_info, on="Vehicle Model", how="left")
+
+    # Visualize Clusters
+    plt.figure(figsize=(10, 6))
+    for cluster in range(kmeans.n_clusters):
+        cluster_points = X_lda[data['Cluster'] == cluster]
+        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f'Cluster {cluster}')
+
+    plt.title('Vehicle Model Clustering with LDA')
+    plt.xlabel('LDA1')
+    plt.ylabel('LDA2')
+    plt.legend()
+    plt.savefig('static/images/lda_clustering.png')
+    plt.close()
+    lda_data = lda_data.round({
+    "Energy Consumed (kWh)": 1,
+    "Charging Duration (hours)": 1,
+    "Charging Rate (kW)": 1,
+    "Distance Driven (since last charge) (km)": 1,
+    "Temperature (°C)": 1
+    })
+    lda_data = lda_data.drop_duplicates(subset="Vehicle Model")
+
+    logging.info("LDA clustering analysis completed and saved as 'lda_clustering.png'")
+    return lda_data
+
+def pca_clustering_analysis(data):
+    # Step 1: Standardize the Data
+    numeric_columns = [
+        'Energy Consumed (kWh)', 'Charging Duration (hours)', 'Charging Rate (kW)',
+        'Distance Driven (since last charge) (km)', 'Temperature (°C)'
+    ]
+    data.dropna(subset=numeric_columns, inplace=True)  # Drop rows with missing numeric values
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(data[numeric_columns])
+
+    # Step 2: Apply PCA
+    pca = PCA(n_components=2)  # Reduce to 2 dimensions for visualization and clustering
+    X_pca = pca.fit_transform(X_scaled)
+
+    # Step 3: K-Means Clustering
+    kmeans = KMeans(n_clusters=3, random_state=42)  # Adjust the number of clusters as needed
+    data['Cluster'] = kmeans.fit_predict(X_pca)
+
+    # Map clusters to meaningful labels (optional)
+    cluster_labels = {
+        0: 'High Efficiency, Small Size',
+        1: 'Medium Efficiency, Large Size',
+        2: 'Low Efficiency, Medium Size'
+    }
+    data['Cluster Label'] = data['Cluster'].map(cluster_labels)
+
+    # Step 4: Aggregate Data (Optional Step for Analysis)
+    aggregation_rules = {
+        "Energy Consumed (kWh)": "mean",  # Average energy consumed
+        "Charging Duration (hours)": "mean",  # Average charging duration
+        "Charging Rate (kW)": "mean",  # Average charging rate
+        "Distance Driven (since last charge) (km)": "mean",  # Average distance driven
+        "Temperature (°C)": "mean"  # Average temperature
+    }
+    aggregated_data = data.groupby("Vehicle Model").agg(aggregation_rules).reset_index()
+
+    # Merge aggregated data with cluster labels
+    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()
+    pca_data = pd.merge(aggregated_data, cluster_info, on="Vehicle Model", how="left")
+
+    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
+
+    # Step 5: Visualize PCA Clusters
+    plt.figure(figsize=(10, 6))
+    for cluster in range(kmeans.n_clusters):
+        cluster_points = X_pca[data['Cluster'] == cluster]
+        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f'Cluster {cluster}')
+
+    plt.title('Vehicle Model Clustering with PCA')
+    plt.xlabel('PCA1')
+    plt.ylabel('PCA2')
+    plt.legend()
+    plt.savefig('static/images/pca_clustering.png')
+    plt.close()
+
+    pca_data = pca_data.round({
+    "Energy Consumed (kWh)": 1,
+    "Charging Duration (hours)": 1,
+    "Charging Rate (kW)": 1,
+    "Distance Driven (since last charge) (km)": 1,
+    "Temperature (°C)": 1
+    })
+    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
+    # Step 6: Display Combined Data
+    print(pca_data)
+
+    return pca_data

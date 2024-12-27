@@ -1,6 +1,71 @@
 {% extends "base.html" %}
 {% block content %}
 <h3>Clustering Analysis</h3>
-<p>Silhouette Score: {{ silhouette_score }}</p>
-<img src="{{ img_path }}" alt="Insights Visualization" class="img-fluid">
+<div id="analysisCarousel" class="carousel slide" data-bs-ride="carousel">
+    <div class="carousel-inner">
+      <!-- Slide 1: Statistik Deskriptif -->
+      <div class="carousel-item active">
+        <div class="text-center">
+            <h2>K-Means Clustering with LDA</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle Model</th>
+                        <th>Cluster Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in lda_data %}
+                    <tr>
+                        <td>{{ row["Vehicle Model"] }}</td>
+                        <td>{{ row["Cluster Label"] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <img src="{{ img_path }}" alt="Insights Visualization" class="img-fluid">
+        </div>
+      </div>
+      <!-- Slide 2: Statistik Deskriptif -->
+      <div class="carousel-item ">
+        <div class="text-center">
+            <h2>K-Means Clustering with PCA</h2>
+            <table>
+                <thead>
+                    <tr>
+                        <th>Vehicle Model</th>
+                        <th>Cluster Label</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for row in pca_data %}
+                    <tr>
+                        <td>{{ row["Vehicle Model"] }}</td>
+                        <td>{{ row["Cluster Label"] }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <img src="{{ img_path2 }}" alt="Insights Visualization" class="img-fluid">
+        </div>
+      </div>
+      <button
+      class="carousel-control-prev"
+      type="button"
+      data-bs-target="#analysisCarousel"
+      data-bs-slide="prev"
+    >
+      <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Previous</span>
+    </button>
+    <button
+      class="carousel-control-next"
+      type="button"
+      data-bs-target="#analysisCarousel"
+      data-bs-slide="next"
+    >
+      <span class="carousel-control-next-icon" aria-hidden="true"></span>
+      <span class="visually-hidden">Next</span>
+    </button>
+  </div>
 {% endblock %}
