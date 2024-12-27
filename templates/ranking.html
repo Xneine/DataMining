@@ -1,6 +1,4 @@
-{% extends "base.html" %}
-
-{% block content %}
+{% extends "base.html" %} {% block content %}
 <h1>Ranking dan Analisis</h1>
 
 <div id="analysisCarousel" class="carousel slide" data-bs-ride="carousel">
@@ -9,42 +7,85 @@
     <div class="carousel-item active">
       <div class="text-center">
         <h3>Statistik Deskriptif</h3>
-        <pre class="text-start mx-auto" style="max-width: 70%;">{{ stats }}</pre>
+        <pre class="text-start mx-auto" style="max-width: 70%">{{ stats }}</pre>
       </div>
     </div>
-    <!-- Slide 2: Ranking dengan PCA -->
+    <!-- Slide 2: Statistik Deskriptif -->
+    <div class="carousel-item active">
+      <div class="text-center">
+        <h3>Ranking berdasarkan ketegori</h3>
+        <pre class="text-start mx-auto" style="max-width: 70%">{{ tabel }}</pre>
+      </div>
+    </div>
+    <!-- Slide 3: Statistik Deskriptif -->
+    <div class="carousel-item active">
+      <div class="text-center">
+        <h3>Statistik Deskriptif</h3>
+        <img
+        src="{{ img_pathVisual }}"
+        alt="LDA"
+        class="img-fluid mx-auto d-block"
+        style="max-height: 400px"
+      />
+      </div>
+    </div>
+    <!-- Slide 4: Ranking dengan PCA -->
     <div class="carousel-item">
       <div>
         <h3>Ranking Efisiensi dengan PCA</h3>
         <p>Silhouette Score:</p>
         <ul class="list-unstyled">
           {% for item in leaderboardPCA %}
-          <li>Rank {{ item.rank }}: {{ item.model }} (Score: {{ item.score }})</li>
+          <li>
+            Rank {{ item.rank }}: {{ item.model }} (Score: {{ item.score }})
+          </li>
           {% endfor %}
         </ul>
-        <img src="{{ img_pathPCA }}" alt="PCA" class="img-fluid mx-auto d-block" style="max-height: 400px;">
+        <img
+          src="{{ img_pathPCA }}"
+          alt="PCA"
+          class="img-fluid mx-auto d-block"
+          style="max-height: 400px"
+        />
       </div>
     </div>
-    <!-- Slide 3: Ranking dengan LDA -->
+    <!-- Slide 5: Ranking dengan LDA -->
     <div class="carousel-item">
       <div class="text-center">
         <h3>Ranking Efisiensi dengan LDA</h3>
         <p>Silhouette Score:</p>
         <ul class="list-unstyled">
           {% for item in leaderboardLDA %}
-          <li>Rank {{ item.rank }}: {{ item.model }} (Score: {{ item.score }})</li>
+          <li>
+            Rank {{ item.rank }}: {{ item.model }} (Score: {{ item.score }})
+          </li>
           {% endfor %}
         </ul>
-        <img src="{{ img_pathLDA }}" alt="LDA" class="img-fluid mx-auto d-block" style="max-height: 400px;">
+        <img
+          src="{{ img_pathLDA }}"
+          alt="LDA"
+          class="img-fluid mx-auto d-block"
+          style="max-height: 400px"
+        />
       </div>
     </div>
   </div>
   <!-- Carousel Controls -->
-  <button class="carousel-control-prev" type="button" data-bs-target="#analysisCarousel" data-bs-slide="prev">
+  <button
+    class="carousel-control-prev"
+    type="button"
+    data-bs-target="#analysisCarousel"
+    data-bs-slide="prev"
+  >
     <span class="carousel-control-prev-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Previous</span>
   </button>
-  <button class="carousel-control-next" type="button" data-bs-target="#analysisCarousel" data-bs-slide="next">
+  <button
+    class="carousel-control-next"
+    type="button"
+    data-bs-target="#analysisCarousel"
+    data-bs-slide="next"
+  >
     <span class="carousel-control-next-icon" aria-hidden="true"></span>
     <span class="visually-hidden">Next</span>
   </button>

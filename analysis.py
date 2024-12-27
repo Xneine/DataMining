@@ -138,3 +138,57 @@ def leaderboard_lda(data):
     plt.close()
 
     return leaderboard
+
+def ranking_analysis_adjustments(data):
+    data['Charging Efficiency'] = (data['Energy Consumed (kWh)'] / data['Charging Duration (hours)']) / data['Battery Capacity (kWh)']
+    data['Range per Charge'] = data['Distance Driven (since last charge) (km)'] / data['Charging Duration (hours)']
+    data['Cost per kWh'] = data['Charging Cost (USD)'] / data['Energy Consumed (kWh)']
+    data['Charging Speed'] = data['Charging Rate (kW)'] / data['Charging Duration (hours)']
+    data['Battery Capacity per Hour'] = data['Battery Capacity (kWh)'] / data['Charging Duration (hours)']
+
+    # Penyesuaian berdasarkan umur kendaraan
+    data['Adjusted Charging Efficiency'] = data['Charging Efficiency'] * (1 - (0.02 * data['Vehicle Age (years)']))
+    data['Adjusted Cost per kWh'] = data['Cost per kWh'] * (1 + (0.01 * data['Vehicle Age (years)']))
+    data['Adjusted Range per Charge'] = data['Range per Charge'] * (1 - (0.01 * data['Vehicle Age (years)']))
+
+    # Memberikan ranking untuk setiap kategori
+    data['Efficiency Ranking'] = data['Adjusted Charging Efficiency'].rank(ascending=False)
+    data['Range Ranking'] = data['Adjusted Range per Charge'].rank(ascending=False)
+    data['Cost Ranking'] = data['Adjusted Cost per kWh'].rank(ascending=True)
+    data['Speed Ranking'] = data['Charging Speed'].rank(ascending=False)
+    data['Capacity Ranking'] = data['Battery Capacity per Hour'].rank(ascending=False)
+
+    # Mengelompokkan berdasarkan model kendaraan dan mengambil rata-rata per kategori
+    df_grouped = data.groupby('Vehicle Model').agg({
+        'Efficiency Ranking': 'mean',
+        'Range Ranking': 'mean',
+        'Cost Ranking': 'mean',
+        'Speed Ranking': 'mean',
+        'Capacity Ranking': 'mean'
+    }).reset_index()
+
+    # Menambahkan kolom Overall
+    df_grouped['Overall Ranking'] = df_grouped[['Efficiency Ranking', 'Range Ranking', 'Cost Ranking', 'Speed Ranking', 'Capacity Ranking']].sum(axis=1)
+    df_grouped = df_grouped.sort_values('Overall Ranking', ascending=True)
+
+    return df_grouped
+
+def comparative_ranking_visualization(df_grouped):
+    categories = ['Efficiency Ranking', 'Range Ranking', 'Cost Ranking', 'Speed Ranking', 'Capacity Ranking', 'Overall Ranking']
+
+    fig, ax = plt.subplots(figsize=(10, 6))
+    bar_width = 0.1
+    index = range(len(df_grouped))
+
+    for i, category in enumerate(categories):
+        ax.barh([p + bar_width * i for p in index], df_grouped[category], bar_width, label=category)
+
+    ax.set_yticks([p + bar_width * (len(categories) // 2) for p in index])
+    ax.set_yticklabels(df_grouped['Vehicle Model'])
+    ax.set_xlabel('Ranking Value')
+    ax.set_title('Vehicle Model Rankings Comparison')
+
+    ax.legend(title='Ranking Categories', loc='upper right')
+    plt.tight_layout()
+    plt.savefig('static/images/comparative_ranking.png')
+    plt.close()
