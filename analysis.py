@@ -290,4 +290,6 @@ def pca_df_func(data):
 def pca_summary_vehicle_model(pca_df):
     pca_summary = pca_df.groupby('Vehicle Model')[['PCA1', 'PCA2']].agg(['mean', 'std'])
     pca_summary.columns = ['PCA1 Mean', 'PCA1 Std', 'PCA2 Mean', 'PCA2 Std']
+    pca_summary = pca_summary.reset_index()  # Mengubah index ke kolom
+    pca_summary = pca_summary.sort_values('Vehicle Model', ascending=True)  # Mengurutkan kolom
     return pca_summary
