@@ -192,3 +192,102 @@ def comparative_ranking_visualization(df_grouped):
     plt.tight_layout()
     plt.savefig('static/images/comparative_ranking.png')
     plt.close()
+    
+def pca_user_type_analysis(data):
+    numerical_cols = [
+        'Battery Capacity (kWh)', 'Energy Consumed (kWh)', 'Charging Duration (hours)',
+        'Charging Rate (kW)', 'Charging Cost (USD)', 'State of Charge (Start %)',
+        'State of Charge (End %)', 'Distance Driven (since last charge) (km)',
+        'Temperature (°C)', 'Vehicle Age (years)'
+    ]
+
+    data[numerical_cols] = data[numerical_cols].fillna(data[numerical_cols].median())
+
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data[numerical_cols])
+
+    pca = PCA(n_components=2)
+    pca_result = pca.fit_transform(scaled_data)
+
+    pca_df = pd.DataFrame(data=pca_result, columns=['PCA1', 'PCA2'])
+    pca_df['User Type'] = data['User Type']
+
+    plt.figure(figsize=(8, 6))
+    for user_type in pca_df['User Type'].unique():
+        subset = pca_df[pca_df['User Type'] == user_type]
+        plt.scatter(subset['PCA1'], subset['PCA2'], label=user_type)
+
+    plt.title('PCA Result for User Type')
+    plt.xlabel('PCA1')
+    plt.ylabel('PCA2')
+    plt.legend()
+    plt.grid(True)
+    plt.savefig('static/images/pca_user_type.png')
+    plt.close()
+
+    explained_variance = pca.explained_variance_ratio_
+    return explained_variance
+
+def pca_distribution_analysis(data):
+    numerical_cols = [
+        'Battery Capacity (kWh)', 'Energy Consumed (kWh)', 'Charging Duration (hours)',
+        'Charging Rate (kW)', 'Charging Cost (USD)', 'State of Charge (Start %)',
+        'State of Charge (End %)', 'Distance Driven (since last charge) (km)',
+        'Temperature (°C)', 'Vehicle Age (years)'
+    ]
+
+    data[numerical_cols] = data[numerical_cols].fillna(data[numerical_cols].median())
+
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data[numerical_cols])
+
+    pca = PCA(n_components=2)
+    pca_result = pca.fit_transform(scaled_data)
+
+    pca_df = pd.DataFrame(data=pca_result, columns=['PCA1', 'PCA2'])
+    pca_df['Vehicle Model'] = data['Vehicle Model']
+    pca_df['User Type'] = data['User Type']
+
+    pca_grouped = pca_df.groupby(['Vehicle Model', 'User Type']).size().unstack(fill_value=0)
+
+    percentage_pca = pca_grouped.div(pca_grouped.sum(axis=1), axis=0) * 100
+    ax = percentage_pca.plot(kind='bar', stacked=True, figsize=(10, 6))
+
+    plt.title('PCA Distribution by Vehicle Model and User Type')
+    plt.xlabel('Vehicle Model')
+    plt.ylabel('Percentage (%)')
+    plt.xticks(rotation=45)
+    plt.legend(title='User Type')
+    plt.grid(True, linestyle='--', alpha=0.6)
+    plt.tight_layout()
+    plt.savefig('static/images/pca_distribution.png')
+    plt.close()
+
+    return pca_grouped
+
+def pca_df_func(data):
+    numerical_cols = [
+        'Battery Capacity (kWh)', 'Energy Consumed (kWh)', 'Charging Duration (hours)',
+        'Charging Rate (kW)', 'Charging Cost (USD)', 'State of Charge (Start %)',
+        'State of Charge (End %)', 'Distance Driven (since last charge) (km)',
+        'Temperature (°C)', 'Vehicle Age (years)'
+    ]
+
+    data[numerical_cols] = data[numerical_cols].fillna(data[numerical_cols].median())
+
+    scaler = StandardScaler()
+    scaled_data = scaler.fit_transform(data[numerical_cols])
+
+    pca = PCA(n_components=2)
+    pca_result = pca.fit_transform(scaled_data)
+
+    pca_df = pd.DataFrame(data=pca_result, columns=['PCA1', 'PCA2'])
+    pca_df['Vehicle Model'] = data['Vehicle Model']
+    pca_df['User Type'] = data['User Type']
+
+    return pca_df
+
+def pca_summary_vehicle_model(pca_df):
+    pca_summary = pca_df.groupby('Vehicle Model')[['PCA1', 'PCA2']].agg(['mean', 'std'])
+    pca_summary.columns = ['PCA1 Mean', 'PCA1 Std', 'PCA2 Mean', 'PCA2 Std']
+    return pca_summary

@@ -1,7 +1,7 @@
 from flask import Flask, render_template
 import pandas as pd
 from data_preprocessing import load_and_preprocess
-from analysis import energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization
+from analysis import pca_df_func, pca_user_type_analysis, pca_distribution_analysis, pca_summary_vehicle_model, energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization
 import os
 
 # Menangani masalah Matplotlib cache directory
@@ -82,7 +82,21 @@ def insights():
         return "Dataset tidak tersedia. Pastikan file CSV sudah diunduh dan diproses."
 
     energy_score = energy_usage_analysis(DATA)
-    return render_template('insights.html', energy_score=energy_score, img_path='static/images/energy_usage.png')
+     
+    pca_user_type = pca_user_type_analysis(DATA)
+    pca_distribution = pca_distribution_analysis(DATA)
+    pca_summary_vehicle = pca_summary_vehicle_model(pca_df_func(DATA))
+    
+    return render_template(
+        'insights.html', 
+        energy_score=energy_score, 
+        img_path='static/images/energy_usage.png',
+        pca_user_type_analysis = pca_user_type,
+        pca_distribution_analysis = pca_distribution,
+        pca_summary_vehicle_model = pca_summary_vehicle,
+        img_path2 = 'static/images/pca_user_type.png',
+        img_path3 = 'static/images/pca_distribution.png'
+        )
 
 if __name__ == "__main__":
     app.run(debug=True)
