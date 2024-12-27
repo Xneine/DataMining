@@ -20,7 +20,7 @@ except FileNotFoundError as e:
 
 @app.route('/')
 def home():
-    return render_template('index.html')
+    return render_template('index.html', img_path='static/images/dataset-cover.jpg')
 
 @app.route('/ranking')
 def ranking():
