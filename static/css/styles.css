@@ -41,6 +41,7 @@ nav ul li a:hover {
 .carousel-inner {
     min-height: 400px; /* Tinggi minimum untuk slide */
     position: relative; /* Memungkinkan positioning relatif untuk anak elemen */
+    padding-top: 15px;
   }
 
   /* Posisi tombol Next dan Previous selalu di tengah vertikal */
@@ -67,12 +68,13 @@ nav ul li a:hover {
     max-height: 400px; /* Batasi tinggi maksimum gambar */
     object-fit: contain; /* Pertahankan proporsi gambar */
   }
+
   body {
     margin: 0;
     font-family: Arial, sans-serif;
     background: none; /* Remove the direct background image */
     position: relative; /* To position the pseudo-element */
-    overflow: hidden; /* Prevent scrolling issues */
+    overflow: auto; /* Prevent scrolling issues */
   }
   
   body::before {
@@ -92,7 +94,7 @@ nav ul li a:hover {
     background: linear-gradient(90deg, rgba(255, 255, 255, 0) 0%, rgb(255, 255, 255) 3%, rgb(255, 255, 255) 97%, rgba(255, 255, 255, 0) 100%);
     padding: 20px;
     border-radius: 12px; /* Smooth, rounded corners */
-    max-width: 800px; /* Limit the width */
+    max-width: 1000px; /* Limit the width */
     margin: 50px auto; /* Center the container */
     text-align: center;
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Add some depth with shadow */
@@ -116,3 +118,70 @@ nav ul li a:hover {
   th {
       background-color: #f2f2f2;
   }
+
+
+  h1 {
+    background-color: #90ee90; /* Warna hijau muda */
+    color:  #2c3e50; 
+    font-weight: bold;
+    padding: 10px; /* Tambahkan padding agar teks terlihat lebih nyaman */
+    text-align: center; /* Posisikan teks di tengah */
+    border-radius: 8px; /* Opsional: Tambahkan sudut melengkung */
+}
+
+/* Container utama untuk menyambut pengguna */
+.welcome-container {
+  background-color: #f0f8ff; /* Warna latar belakang biru muda */
+  padding: 5px;
+  border-radius: 12px;
+  text-align: center; /* Pusatkan teks */
+  max-width: 600px;
+  margin: 50px auto; /* Tengah di halaman */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Tambahkan bayangan untuk estetika */
+}
+
+/* Gaya untuk elemen <h1> */
+.welcome-container h1 {
+  color: #2c3e50; /* Warna teks biru gelap */
+  font-size: 2.5rem;
+  font-weight: bold;
+  margin-bottom: 20px;
+  line-height: 1.4;
+}
+
+/* Gaya untuk daftar tim */
+.team-list {
+  list-style-type: none; /* Hilangkan bullet point */
+  padding: 0;
+  color: #34495e; /* Warna teks abu-abu gelap */
+  font-size: 1.2rem;
+  margin-bottom: 20px;
+}
+
+.team-list li {
+  margin: 5px 0;
+}
+
+/* Gaya untuk paragraf */
+.welcome-container p {
+  font-size: 1.1rem;
+  color: #2c3e50;
+  margin-bottom: 20px;
+}
+
+/* Gaya untuk tautan dataset */
+.dataset-link {
+  display: inline-block; /* Tampilkan sebagai tombol */
+  background-color: #3498db; /* Warna biru */
+  color: #fff; /* Warna teks putih */
+  text-decoration: none; /* Hilangkan underline */
+  padding: 10px 20px;
+  border-radius: 8px;
+  font-size: 1.1rem;
+  transition: all 0.3s ease; /* Animasi saat hover */
+}
+
+.dataset-link:hover {
+  background-color: #1d6fa5; /* Warna biru lebih gelap saat hover */
+  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Tambahkan efek bayangan saat hover */
+}

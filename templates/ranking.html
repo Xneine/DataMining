@@ -5,13 +5,14 @@
   <div class="carousel-inner">
     <!-- Slide 1: Statistik Deskriptif -->
     <div class="carousel-item active">
-      <div class="text-center">
+      <div class="text-center" style="display: flex; align-items: center; flex-direction: column; min-height: 400px;">
         <h3>Statistik Deskriptif</h3>
-        <pre class="text-start mx-auto" style="max-width: 70%">{{ stats }}</pre>
+        <pre class="text-start" style="max-width: 70%; text-align: center; margin: 0 auto;">{{ stats }}</pre>
       </div>
     </div>
+    
     <!-- Slide 2: Statistik Deskriptif -->
-    <div class="carousel-item ">
+    <div class="carousel-item " >
       <div class="text-center">
         <h3>Ranking berdasarkan ketegori</h3>
         <pre class="text-start mx-auto" style="max-width: 70%">{{ tabel }}</pre>
@@ -34,13 +35,24 @@
       <div>
         <h3>Ranking Efisiensi dengan PCA</h3>
         <p>Silhouette Score:</p>
-        <ul class="list-unstyled">
-          {% for item in leaderboardPCA %}
-          <li>
-            Rank {{ item.rank }}: {{ item.model }} (Score: {{ item.score }})
-          </li>
-          {% endfor %}
-        </ul>
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Car Name</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in leaderboardPCA %}
+            <tr>
+              <td>{{ item.rank }}</td>
+              <td>{{ item.model }}</td>
+              <td>{{ item.score }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>        
         <img
           src="{{ img_pathPCA }}"
           alt="PCA"
@@ -54,13 +66,25 @@
       <div class="text-center">
         <h3>Ranking Efisiensi dengan LDA</h3>
         <p>Silhouette Score:</p>
-        <ul class="list-unstyled">
-          {% for item in leaderboardLDA %}
-          <li>
-            Rank {{ item.rank }}: {{ item.model }} (Score: {{ item.score }})
-          </li>
-          {% endfor %}
-        </ul>
+        <table>
+          <thead>
+            <tr>
+              <th>Rank</th>
+              <th>Car Name</th>
+              <th>Score</th>
+            </tr>
+          </thead>
+          <tbody>
+            {% for item in leaderboardLDA %}
+            <tr>
+              <td>{{ item.rank }}</td>
+              <td>{{ item.model }}</td>
+              <td>{{ item.score }}</td>
+            </tr>
+            {% endfor %}
+          </tbody>
+        </table>
+        
         <img
           src="{{ img_pathLDA }}"
           alt="LDA"
