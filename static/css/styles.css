@@ -107,7 +107,7 @@ nav ul li a:hover {
       margin-left: auto;
       margin-right: auto;
       border-collapse: collapse;
-      width: 80%; /* Optional: adjust table width */
+      width: 70%; /* Optional: adjust table width */
   }
   th, td {
       padding: 8px;
@@ -121,8 +121,8 @@ nav ul li a:hover {
 
 
   h1 {
-    background-color: #90ee90; /* Warna hijau muda */
-    color:  #2c3e50; 
+    background-color: #3498db; 
+    color:  white; 
     font-weight: bold;
     padding: 10px; /* Tambahkan padding agar teks terlihat lebih nyaman */
     text-align: center; /* Posisikan teks di tengah */
@@ -131,35 +131,62 @@ nav ul li a:hover {
 
 /* Container utama untuk menyambut pengguna */
 .welcome-container {
-  background-color: #f0f8ff; /* Warna latar belakang biru muda */
-  padding: 5px;
-  border-radius: 12px;
-  text-align: center; /* Pusatkan teks */
-  max-width: 600px;
-  margin: 50px auto; /* Tengah di halaman */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1); /* Tambahkan bayangan untuk estetika */
+  background: linear-gradient(135deg, #e0f7fa, #bbdefb);
+  padding: 20px;
+  border-radius: 16px;
+  text-align: center;
+  max-width: 700px;
+  margin: 50px auto;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+  animation: fadeIn 1.5s ease-in-out;
 }
 
 /* Gaya untuk elemen <h1> */
 .welcome-container h1 {
-  color: #2c3e50; /* Warna teks biru gelap */
-  font-size: 2.5rem;
+   color: white;
+  font-size: 2.8rem;
   font-weight: bold;
-  margin-bottom: 20px;
-  line-height: 1.4;
+  margin-bottom: 15px;
+  text-shadow: 2px 2px 8px rgba(0, 0, 0, 0.2);
 }
 
-/* Gaya untuk daftar tim */
+//* Daftar tim */
 .team-list {
-  list-style-type: none; /* Hilangkan bullet point */
+  list-style: none; /* Hilangkan bullet */
   padding: 0;
-  color: #34495e; /* Warna teks abu-abu gelap */
-  font-size: 1.2rem;
-  margin-bottom: 20px;
+  margin: 0 auto; /* Pusatkan daftar */
+  color: #37474f;
+  font-size: 1.1rem;
+  font-family: 'Poppins', sans-serif; /* Gunakan font Poppins */
+  font-weight: 400; /* Ketebalan normal */
+  display: grid; /* Gunakan grid untuk tata letak */
+  grid-gap: 8px; /* Jarak antar item */
+  max-width: 300px; /* Batas lebar daftar */
 }
 
 .team-list li {
-  margin: 5px 0;
+  display: flex;
+  align-items: center; /* Rata vertikal */
+  gap: 10px; /* Jarak antara ikon dan teks */
+  padding: 10px 15px; /* Ruang dalam */
+  background: linear-gradient(135deg, #e3f2fd, #2e7ab9); /* Warna latar belakang gradient */
+  border-radius: 12px; /* Sudut melengkung */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1); /* Bayangan */
+  transition: all 0.3s ease; /* Animasi halus */
+}
+
+/* Tambahkan ikon untuk setiap nama */
+.team-list li::before {
+  content: "👤"; /* Gunakan emoji atau ganti dengan ikon lain */
+  font-size: 1.2rem;
+  color: #5c6bc0; /* Warna ikon */
+}
+
+/* Efek hover */
+.team-list li:hover {
+  background: linear-gradient(135deg, #bbdefb, #2e7ab9); /* Ubah warna saat hover */
+  transform: translateY(-2px); /* Efek naik */
+  box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2); /* Bayangan lebih besar */
 }
 
 /* Gaya untuk paragraf */
@@ -181,7 +208,48 @@ nav ul li a:hover {
   transition: all 0.3s ease; /* Animasi saat hover */
 }
 
+
 .dataset-link:hover {
-  background-color: #1d6fa5; /* Warna biru lebih gelap saat hover */
-  box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2); /* Tambahkan efek bayangan saat hover */
+  transform: scale(1.05);
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.2);
 }
+
+/* Animasi */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+table th, table td {
+  text-align: center;
+  vertical-align: middle;
+}
+#table_sendiri {
+  table-layout: fixed; /* Pastikan kolom memiliki lebar tetap */
+  width: 100%; /* Pastikan tabel menggunakan lebar penuh dari container */
+  word-wrap: break-word; /* Bungkus teks panjang */
+  white-space: normal; /* Izinkan teks membungkus */
+  border-collapse: collapse; /* Gabungkan border tabel */
+}
+
+#table_sendiri th, #table_sendiri td {
+  overflow: hidden; /* Sembunyikan teks yang melebihi kolom */
+  text-overflow: ellipsis; /* Tambahkan "..." untuk teks yang sangat panjang */
+  white-space: normal; /* Bungkus teks */
+  word-wrap: break-word; /* Bungkus teks yang panjang */
+  padding: 8px; /* Tambahkan padding agar lebih nyaman dibaca */
+  vertical-align: middle; /* Ratakan teks di tengah secara vertikal */
+}
+
+.carousel-item {
+  animation: fadeIn 1s ease-in-out; /* Gunakan animasi fadeIn */
+  opacity: 1; /* Pastikan slide aktif terlihat */
+  transform: translateY(0); /* Pastikan posisi tetap */
+}
+

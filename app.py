@@ -27,11 +27,20 @@ def ranking():
     if DATA is None:
         return "Dataset tidak tersedia. Pastikan file CSV sudah diunduh dan diproses."
 
+    # Statistik deskriptif
     stats = descriptive_stats(DATA)
     
+    # Ranking berdasarkan kategori
     tabel = ranking_analysis_adjustments(DATA)
+    if isinstance(tabel, pd.DataFrame):
+        rankings = tabel.to_dict('records')  # Konversi DataFrame ke list of dictionaries
+    else:
+        return "Data ranking tidak dalam format yang diharapkan."
+
+    # Visualisasi perbandingan ranking
     comparative_ranking_visualization(tabel)
-    # Process PCA leaderboard
+
+    # Leaderboard PCA
     leaderboardPCA = leaderboard_pca(DATA)
     if isinstance(leaderboardPCA, pd.DataFrame):
         pca_items = []
@@ -44,7 +53,7 @@ def ranking():
     else:
         return "Leaderboard PCA tidak dalam format yang diharapkan."
 
-    # Process LDA leaderboard
+    # Leaderboard LDA
     leaderboardLDA = leaderboard_lda(DATA)
     if isinstance(leaderboardLDA, pd.DataFrame):
         lda_items = []
@@ -58,15 +67,16 @@ def ranking():
         return "Leaderboard LDA tidak dalam format yang diharapkan."
     
     return render_template(
-        'ranking.html', 
-        stats=stats, 
-        leaderboardPCA=pca_items, 
+        'ranking.html',
+        stats=stats,
+        rankings=rankings,  # Data ranking untuk tabel
+        leaderboardPCA=pca_items,
         img_pathPCA='static/images/leaderboard_pca.png',
-        leaderboardLDA=lda_items, 
+        leaderboardLDA=lda_items,
         img_pathLDA='static/images/leaderboard_lda.png',
-        img_pathVisual = 'static/images/comparative_ranking.png',
-        tabel = tabel
+        img_pathVisual='static/images/comparative_ranking.png'
     )
+
 
 @app.route('/clustering')
 def clustering():
