@@ -1,0 +1,48 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Check Vehicle Efficiency</h1>
+    <p class="text-muted text-center">Masukkan detail kendaraan Anda untuk membandingkan efisiensinya dengan dataset.</p>
+
+    <form method="POST" action="/check_efficiency" class="mt-4">
+        <div class="row">
+            <div class="col-md-6 mb-3">
+                <label for="vehicle_model" class="form-label">Vehicle Model:</label>
+                <select class="form-select" id="vehicle_model" name="vehicle_model" required>
+                    <option value="" disabled selected>Pilih Model Kendaraan</option>
+                    {% for model in vehicle_models %}
+                    <option value="{{ model }}">{{ model }}</option>
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="charging_duration" class="form-label">Charging Duration (hours):</label>
+                <input type="number" class="form-control" id="charging_duration" name="charging_duration" placeholder="2" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="start_soc" class="form-label">State of Charge (Start %):</label>
+                <input type="number" class="form-control" id="start_soc" name="start_soc" placeholder="20" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="end_soc" class="form-label">State of Charge (End %):</label>
+                <input type="number" class="form-control" id="end_soc" name="end_soc" placeholder="80" required>
+            </div>
+            <div class="col-md-6 mb-3">
+                <label for="vehicle_age" class="form-label">Vehicle Age (years):</label>
+                <input type="number" class="form-control" id="vehicle_age" name="vehicle_age" placeholder="3" required>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Compare Efficiency</button>
+    </form>
+
+    {% if efficiency_result %}
+    <div class="mt-5">
+        <h2 class="text-center">Efficiency Comparison Result</h2>
+        <p><strong>Vehicle Model:</strong> {{ efficiency_result.vehicle_model }}</p>
+        <p><strong>Predicted Efficiency:</strong> {{ efficiency_result.predicted_efficiency }}%</p>
+        <p><strong>Dataset Average Efficiency:</strong> {{ efficiency_result.dataset_avg_efficiency }}%</p>
+        <p><strong>Difference:</strong> {{ efficiency_result.difference }}%</p>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

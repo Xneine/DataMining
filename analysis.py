@@ -6,9 +6,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import silhouette_score
 import matplotlib.pyplot as plt
-from sklearn.preprocessing import StandardScaler
 from sklearn.impute import SimpleImputer
 from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsRegressor
 import logging
 import os
 
@@ -470,3 +470,39 @@ def predict_vehicle_model(lda, scaler, battery_capacity, charging_duration, char
     prediction = lda.predict(input_data)
     probabilities = lda.predict_proba(input_data)
     return prediction[0], probabilities
+
+# Function to compare efficiency using KNN
+def knn_efficiency_comparison(data, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age):
+    # Filter dataset untuk model kendaraan yang sama
+    filtered_data = data[data['Vehicle Model'] == vehicle_model]
+
+    # Variabel input dan target
+    features = ['Charging Duration (hours)', 'State of Charge (Start %)', 'State of Charge (End %)', 'Vehicle Age (years)']
+    target = 'Charging Duration (hours)'
+
+    # Data preprocessing
+    X = filtered_data[features]
+    y = filtered_data[target]
+
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Model KNN
+    knn = KNeighborsRegressor(n_neighbors=3)
+    knn.fit(X_scaled, y)
+
+    # Input user
+    user_input = scaler.transform([[charging_duration, start_soc, end_soc, vehicle_age]])
+    predicted_efficiency = knn.predict(user_input)[0]
+
+    # Output
+    comparison = {
+        'predicted_efficiency': round(predicted_efficiency, 2),
+        'dataset_avg_efficiency': round(filtered_data[target].mean(), 2),
+        'difference': round(predicted_efficiency - filtered_data[target].mean(), 2),
+        'vehicle_model': vehicle_model
+    }
+
+    return comparison
+
+    return comparison
