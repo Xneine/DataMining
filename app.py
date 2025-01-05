@@ -1,7 +1,7 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, request
 import pandas as pd
 from data_preprocessing import load_and_preprocess
-from analysis import pca_df_func, pca_user_type_analysis, pca_distribution_analysis, pca_summary_vehicle_model, energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization, lda_clustering_analysis,pca_clustering_analysis
+from analysis import train_lda_model, predict_vehicle_model,pca_df_func, pca_user_type_analysis, pca_distribution_analysis, pca_summary_vehicle_model, energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization, lda_clustering_analysis,pca_clustering_analysis
 import os
 
 # Menangani masalah Matplotlib cache directory
@@ -108,6 +108,30 @@ def insights():
         img_path2 = 'static/images/pca_user_type.png',
         img_path3 = 'static/images/pca_distribution.png'
         )
+    
+lda, scaler, accuracy = train_lda_model(DATA)
+@app.route('/prediction', methods=['GET', 'POST'])
+def prediction():
+    if request.method == 'POST':
+        battery_capacity = float(request.form['battery_capacity'])
+        charging_duration = float(request.form['charging_duration'])
+        charging_rate = float(request.form['charging_rate'])
+
+        predicted_model, class_probabilities = predict_vehicle_model(
+            lda, scaler, battery_capacity, charging_duration, charging_rate
+        )
+
+        vehicle_models = lda.classes_
+        probabilities = class_probabilities[0].tolist()
+        return render_template(
+            'prediction.html',
+            predicted_model=predicted_model,
+            vehicle_models=vehicle_models,
+            probabilities=probabilities,
+            zip=zip  # Tambahkan zip ke konteks template
+        )
+
+    return render_template('prediction.html', predicted_model=None)
 
 if __name__ == "__main__":
     app.run(debug=True)

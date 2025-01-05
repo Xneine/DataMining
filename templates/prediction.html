@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% block content %}
+<div class="container mt-5">
+    <h1 class="text-center">Vehicle Model Prediction</h1>
+    <p class="text-muted text-center">Masukkan detail kendaraan untuk memprediksi model kendaraan berdasarkan data yang tersedia.</p>
+    
+    <form method="POST" action="/prediction" class="mt-4">
+        <div class="row">
+            <div class="col-md-4 mb-3">
+                <label for="battery_capacity" class="form-label">Battery Capacity (kWh):</label>
+                <input type="number" class="form-control" id="battery_capacity" name="battery_capacity" placeholder="70" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="charging_duration" class="form-label">Charging Duration (hours):</label>
+                <input type="number" class="form-control" id="charging_duration" name="charging_duration" placeholder="2" required>
+            </div>
+            <div class="col-md-4 mb-3">
+                <label for="charging_rate" class="form-label">Charging Rate (kW):</label>
+                <input type="number" class="form-control" id="charging_rate" name="charging_rate" placeholder="50" required>
+            </div>
+        </div>
+        <button type="submit" class="btn btn-primary w-100">Predict</button>
+    </form>
+
+    {% if predicted_model %}
+    <div class="mt-5">
+        <h2 class="text-center">Prediction Result</h2>
+        <p class="text-center"><strong>Predicted Vehicle Model:</strong> {{ predicted_model }}</p>
+        <h3 class="text-center">Prediction Probabilities:</h3>
+        <div class="row justify-content-center">
+            <div class="col-md-6">
+                <ul class="list-group">
+                    {% for model, prob in zip(vehicle_models, probabilities) %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        {{ model }}
+                        <span class="badge bg-primary rounded-pill">{{ "{:.2f}".format(prob * 100) }}%</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+            </div>
+        </div>
+        <div class="mt-4">
+            <h4 class="text-center">Probability Chart</h4>
+            <img src="/static/images/prediction_chart.png" class="img-fluid mx-auto d-block" alt="Prediction Probabilities Chart">
+        </div>
+    </div>
+    {% endif %}
+</div>
+{% endblock %}

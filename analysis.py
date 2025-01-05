@@ -6,6 +6,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.linear_model import LinearRegression
 from sklearn.metrics import silhouette_score
 import matplotlib.pyplot as plt
+from sklearn.preprocessing import StandardScaler
+from sklearn.impute import SimpleImputer
+from sklearn.model_selection import train_test_split
 import logging
 import os
 
@@ -433,3 +436,37 @@ def pca_clustering_analysis(data):
     print(pca_data)
 
     return pca_data
+
+# Function to train LDA model
+def train_lda_model(data):
+    features = ["Battery Capacity (kWh)", "Charging Duration (hours)", "Charging Rate (kW)"]
+    target = "Vehicle Model"
+
+    X = data[features]
+    y = data[target]
+
+    # Handle missing values
+    imputer = SimpleImputer(strategy='mean')
+    X = imputer.fit_transform(X)
+
+    # Scale the features
+    scaler = StandardScaler()
+    X_scaled = scaler.fit_transform(X)
+
+    # Split the data
+    X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
+
+    # Train the LDA model
+    lda = LDA()
+    lda.fit(X_train, y_train)
+
+    # Test model accuracy
+    accuracy = lda.score(X_test, y_test)
+    return lda, scaler, accuracy
+
+# Function to predict vehicle model
+def predict_vehicle_model(lda, scaler, battery_capacity, charging_duration, charging_rate):
+    input_data = scaler.transform([[battery_capacity, charging_duration, charging_rate]])
+    prediction = lda.predict(input_data)
+    probabilities = lda.predict_proba(input_data)
+    return prediction[0], probabilities
