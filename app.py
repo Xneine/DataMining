@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import pandas as pd
 from data_preprocessing import load_and_preprocess
-from analysis import visualize_prediction_probabilities, knn_efficiency_comparison,train_lda_model, predict_vehicle_model,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization, lda_clustering_analysis,pca_clustering_analysis
+from analysis import kmeans_efficiency_classification, visualize_prediction_probabilities,train_lda_model, predict_vehicle_model,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization, lda_clustering_analysis,pca_clustering_analysis
 import os
 
 # Menangani masalah Matplotlib cache directory
@@ -114,20 +114,19 @@ def prediction():
     return render_template('prediction.html', predicted_model=None)
 
 VEHICLE_MODELS = DATA['Vehicle Model'].unique().tolist()
-
 @app.route('/check_efficiency', methods=['GET', 'POST'])
 def check_efficiency():
     if request.method == 'POST':
-        # Ambil input dari pengguna
         vehicle_model = request.form['vehicle_model']
         charging_duration = float(request.form['charging_duration'])
         start_soc = float(request.form['start_soc'])
         end_soc = float(request.form['end_soc'])
         vehicle_age = float(request.form['vehicle_age'])
+        battery_capacity = float(request.form['battery_capacity'])
 
-        # Bandingkan dengan dataset menggunakan KNN
-        efficiency_result = knn_efficiency_comparison(
-            DATA, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age
+        # Klasifikasi efisiensi berdasarkan K-Means
+        efficiency_result = kmeans_efficiency_classification(
+            DATA, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age, battery_capacity
         )
 
         return render_template(
@@ -138,12 +137,15 @@ def check_efficiency():
                 'charging_duration': charging_duration,
                 'start_soc': start_soc,
                 'end_soc': end_soc,
-                'vehicle_age': vehicle_age
+                'vehicle_age': vehicle_age,
+                'battery_capacity': battery_capacity
             },
             vehicle_models=VEHICLE_MODELS
         )
 
     return render_template('check_efficiency.html', efficiency_result=None, vehicle_models=VEHICLE_MODELS)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

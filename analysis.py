@@ -357,36 +357,77 @@ def visualize_prediction_probabilities(probabilities, vehicle_models):
     plt.savefig('static/images/prediction_probabilities.png')
     plt.close()
 
-# Function to compare efficiency using KNN
-def knn_efficiency_comparison(data, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age):
+# Function to classify efficiency into clusters (Low, Medium, High) with Battery Capacity and visualization
+def kmeans_efficiency_classification(data, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age, battery_capacity):
     # Filter dataset untuk model kendaraan yang sama
     filtered_data = data[data['Vehicle Model'] == vehicle_model]
 
     # Variabel input dan target
-    features = ['Charging Duration (hours)', 'State of Charge (Start %)', 'State of Charge (End %)', 'Vehicle Age (years)']
-    target = 'Charging Duration (hours)'
+    features = ['Charging Duration (hours)', 'State of Charge (Start %)', 'State of Charge (End %)', 'Vehicle Age (years)', 'Battery Capacity (kWh)']
 
-    # Data preprocessing
+    # Hitung efisiensi dataset dengan rumus: (SOC End - SOC Start) / (Charging Duration * Battery Capacity)
+    filtered_data['Efficiency'] = (
+        (filtered_data['State of Charge (End %)'] - filtered_data['State of Charge (Start %)']) /
+        (filtered_data['Charging Duration (hours)'] * (1 + 0.05 * filtered_data['Vehicle Age (years)']) * filtered_data['Battery Capacity (kWh)'])
+    ) * 100  # Skalakan ke 100% (raw efficiency)
+
+    # Data preprocessing: Ambil fitur input
     X = filtered_data[features]
-    y = filtered_data[target]
 
+    # Standarisasi data agar fitur memiliki skala yang sama
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # Model KNN
-    knn = KNeighborsRegressor(n_neighbors=3)
-    knn.fit(X_scaled, y)
+    # Gunakan model K-Means untuk mengelompokkan data berdasarkan efisiensi
+    kmeans = KMeans(n_clusters=3, random_state=42)
+    filtered_data['Cluster'] = kmeans.fit_predict(X_scaled)
 
-    # Input user
-    user_input = scaler.transform([[charging_duration, start_soc, end_soc, vehicle_age]])
-    predicted_efficiency = knn.predict(user_input)[0]
+    # Beri label kategori ke setiap cluster
+    cluster_labels = {0: 'Low', 1: 'Medium', 2: 'High'}
+    cluster_efficiency = filtered_data.groupby('Cluster')['Efficiency'].mean().sort_values().index
+    for i, cluster in enumerate(cluster_efficiency):
+        cluster_labels[cluster] = ['Low', 'Medium', 'High'][i]
+    filtered_data['Efficiency Category'] = filtered_data['Cluster'].map(cluster_labels)
 
-    # Output
+    # Buat input user berdasarkan parameter yang dimasukkan
+    user_input = pd.DataFrame([[charging_duration, start_soc, end_soc, vehicle_age, battery_capacity]], columns=features)
+
+    # Standarisasi input user
+    user_scaled = scaler.transform(user_input)
+
+    # Prediksi cluster input user menggunakan model K-Means
+    user_cluster = kmeans.predict(user_scaled)[0]
+
+    # Tentukan kategori efisiensi untuk input user
+    user_efficiency_category = cluster_labels[user_cluster]
+
+    # Visualisasi clustering
+    plt.figure(figsize=(10, 6))
+    for cluster in range(3):
+        cluster_points = filtered_data[filtered_data['Cluster'] == cluster]
+        plt.scatter(
+            cluster_points['Charging Duration (hours)'],
+            cluster_points['Efficiency'],
+            label=f"Cluster {cluster} ({cluster_labels[cluster]})"
+        )
+    plt.scatter(
+        charging_duration, 
+        (end_soc - start_soc) / (charging_duration * (1 + 0.05 * vehicle_age) * battery_capacity) * 100,
+        color='red', label='User Input', edgecolors='black', linewidths=2, s=100
+    )
+    plt.title("Clustering Visualization with Battery Capacity")
+    plt.xlabel("Charging Duration (hours)")
+    plt.ylabel("Efficiency (%)")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('static/images/clustering_visualization.png')
+    plt.close()
+
+    # Output perbandingan
     comparison = {
-        'predicted_efficiency': round(predicted_efficiency, 2),
-        'dataset_avg_efficiency': round(filtered_data[target].mean(), 2),
-        'difference': round(predicted_efficiency - filtered_data[target].mean(), 2),
-        'vehicle_model': vehicle_model
+        'vehicle_model': vehicle_model,
+        'efficiency_category': user_efficiency_category,
+        'visualization_path': 'static/images/clustering_visualization.png'
     }
 
     return comparison
