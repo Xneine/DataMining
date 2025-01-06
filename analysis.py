@@ -437,50 +437,65 @@ def pca_clustering_analysis(data):
 
     return pca_data
 
-# Function to train LDA model
-def train_lda_model(data):
-    features = ["Battery Capacity (kWh)", "Charging Duration (hours)", "Charging Rate (kW)"]
-    target = "Vehicle Model"
 
-    X = data[features]
-    y = data[target]
+# Fungsi untuk training LDA untuk fitur prediksi mobil
+#LDA adalah model klasifikasi linier yang mencari kombinasi fitur untuk memaksimalkan perbedaan antar kelas
+def train_lda_model(data): #parameter yang harus di isii [kapasitas baterai dalam kwh, lama durasi pengecharge an dengan jam, kecepatan pengisian dalam kilowatt]
+    features = ["Battery Capacity (kWh)", "Charging Duration (hours)", "Charging Rate (kW)"] 
+    target = "Vehicle Model" #target utama yang diprediksi di bagian vehicle model
 
-    # Handle missing values
-    imputer = SimpleImputer(strategy='mean')
+    X = data[features] #fitur input
+    y = data[target] #target prediksi
+
+    #handle untuk nilai kosong (dari kolom" nya yang masih kosong, di isi menggunakan rata" )
+    imputer = SimpleImputer(strategy='mean') #menggunakan library sklearn yaitu simpleImputer
     X = imputer.fit_transform(X)
 
-    # Scale the features
+    #data di standarisasi ulang agar semua model LDA bisa bekerja dengan optimal
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # Split the data
+    #membagi data jadi train 80% dan pengujian 20% pakai fungsi train_test_split
+    #parameter random_state dibuat 42 agar hasil pembagian data konsisten
     X_train, X_test, y_train, y_test = train_test_split(X_scaled, y, test_size=0.2, random_state=42)
 
-    # Train the LDA model
+    #melatih model LDA  
     lda = LDA()
     lda.fit(X_train, y_train)
 
-    # Test model accuracy
+    #akurasi model diukur menggunakan data pengujian (X_test, y_test) dengan metode score, yang menghitung proporsi prediksi yang benar
     accuracy = lda.score(X_test, y_test)
+    
+    #fungsi return Model LDA yang sudah di train, Scaler untuk preprocessing data baru, dan akurasi model
     return lda, scaler, accuracy
 
-# Function to predict vehicle model
+#prediksi model kendaraan berdasarkan input 
+#param pakai LDA dari model yang sudah di train, Scaler = object StandardScaler yang telah dilatih , ...
 def predict_vehicle_model(lda, scaler, battery_capacity, charging_duration, charging_rate):
-    input_data = scaler.transform([[battery_capacity, charging_duration, charging_rate]])
+    #data input disusun dalam bentuk array 2D diperlukan oleh metode scaler.transform() dan model LDA untuk melakukan prediksi
+    input_data = scaler.transform([[battery_capacity, charging_duration, charging_rate]]) 
+    #fungsi scaler.transform menormalisasi data input menggunakan scaler yang dilatih sebelumnya, jadi nilai-nilainya dalam scale yang sesuai
+    
+    #melakukan prediksi dengan model LDA digunakan untuk memprediksi kategori atau model kendaraan (lda.predict)
     prediction = lda.predict(input_data)
+    #menghitung probabilitas kelas, lda.predict_proba menghasilkan probabilitas untuk setiap mobil
+    #probabilitas menunjukkan seberapa keyakinan model terhadap setiap kemungkinan kelas 
     probabilities = lda.predict_proba(input_data)
-    return prediction[0], probabilities
+    return prediction[0], probabilities #return prediction[0] untuk setiap Prediksi model kendaraan dengan probabilitas tertinggi
+    #probabilities = Probabilitas untuk semua model kendaraan
 
+#membuat visualisasi probabilitas prediksi model kendaraan dalam bentuk diagram batang (bar chart) dan menyimpannya sebagai file gambar
+#parameternya probabilities array yang berisi probabilitas prediksi untuk setiap model kendaraan, vehicle_models  array berisi nama" model kendaraan yang sesuai dengan urutan probabilitas
 def visualize_prediction_probabilities(probabilities, vehicle_models):
-    plt.figure(figsize=(8, 6))
-    plt.bar(vehicle_models, probabilities, alpha=0.7)
-    plt.xlabel("Vehicle Models")
+    plt.figure(figsize=(8, 6)) #dibuat ukuran 8 x 6 inch biar tidak terlalu besar
+    plt.bar(vehicle_models, probabilities, alpha=0.7) #buat diagram batang, model kendaraan jadi sumbu x, probabilities jadi tinggi/sumbu y, alpha=0.7 Transparansi warna batang
+    plt.xlabel("Vehicle Models") #label dan judul
     plt.ylabel("Prediction Probability")
     plt.title("Prediction Probabilities for Vehicle Models")
-    plt.xticks(rotation=45)
-    plt.tight_layout()
-    plt.savefig('static/images/prediction_probabilities.png')
-    plt.close()
+    plt.xticks(rotation=45) #putar label sumbu x agak miring untuk antisipasi nama panjang
+    plt.tight_layout() #mengatur layout agar tidak terlalu terlalu sempit
+    plt.savefig('static/images/prediction_probabilities.png') #save gambar untuk dikirim ke frontend
+    plt.close() #close plt untuk save memory
 
 # Function to compare efficiency using KNN
 def knn_efficiency_comparison(data, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age):

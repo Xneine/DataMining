@@ -1,7 +1,8 @@
 {% extends "base.html" %}
 {% block content %}
 <div class="container mt-5">
-    <h1 class="text-center">Vehicle Model Prediction</h1>
+    <h1 class="text-center">Vehicle Model Prediction</h1> 
+    <!-- input detail yang ingin diprediksi -->
     <p class="text-muted text-center">Masukkan detail kendaraan untuk memprediksi model kendaraan berdasarkan data yang tersedia.</p>
     
     <form method="POST" action="/prediction" class="mt-4">
@@ -23,13 +24,14 @@
     </form>
 
     {% if predicted_model %}
+    <!-- memanggil predicted model dari backend -->
     <div class="mt-5">
         <h2 class="text-center">Prediction Result</h2>
-        <p class="text-center"><strong>Predicted Vehicle Model:</strong> {{ predicted_model }}</p>
+        <p class="text-center"><strong>Predicted Vehicle Model:</strong> {{ predicted_model }}</p> <!-- tampilkan prediksi terkuat dari perhitungan model LDA -->
         <h3 class="text-center">Prediction Probabilities:</h3>
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <ul class="list-group">
+                <ul class="list-group"> <!-- memunculkan semua model kendaraan dan probabilitasnya -->
                     {% for model, prob in zip(vehicle_models, probabilities) %}
                     <li class="list-group-item d-flex justify-content-between align-items-center">
                         {{ model }}
@@ -39,7 +41,7 @@
                 </ul>
             </div>
         </div>
-        <div class="mt-4">
+        <div class="mt-4"> <!-- memanggil gambar chart dari backend -->
             <h4 class="text-center">Probability Chart</h4>
             <img src="/static/images/prediction_probabilities.png" class="img-fluid mx-auto d-block" alt="Prediction Probabilities Chart">
         </div>
