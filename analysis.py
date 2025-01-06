@@ -54,30 +54,6 @@ def clustering_analysis(data):
     return silhouette_avg
 
 
-def energy_usage_analysis(data):
-    logging.info("Memulai analisis konsumsi energi")
-    data = data.copy()  # Buat salinan
-    model = LinearRegression()
-    X = data[['Vehicle Age (years)']]
-    y = data['Energy Consumed (kWh)']
-    model.fit(X, y)
-    score = model.score(X, y)
-    logging.info(f"Skor regresi linear: {score}")
-
-    # Plot hubungan
-    plt.figure(figsize=(8, 6))
-    plt.scatter(data['Vehicle Age (years)'], data['Energy Consumed (kWh)'], alpha=0.5, label='Data')
-    plt.plot(data['Vehicle Age (years)'], model.predict(X), color='red', label='Regresi Linear')
-    plt.title('Hubungan Usia Kendaraan dan Konsumsi Energi')
-    plt.xlabel('Vehicle Age (years)')
-    plt.ylabel('Energy Consumed (kWh)')
-    plt.legend()
-    plt.savefig('static/images/energy_usage.png')
-    plt.close()
-
-    return score
-
-
 def leaderboard_pca(data):
     logging.info("Menghitung leaderboard PCA")
     data = data.copy()  # Buat salinan
@@ -196,107 +172,6 @@ def comparative_ranking_visualization(df_grouped):
     plt.savefig('static/images/comparative_ranking.png')
     plt.close()
     
-def pca_user_type_analysis(data):
-    numerical_cols = [
-        'Battery Capacity (kWh)', 'Energy Consumed (kWh)', 'Charging Duration (hours)',
-        'Charging Rate (kW)', 'Charging Cost (USD)', 'State of Charge (Start %)',
-        'State of Charge (End %)', 'Distance Driven (since last charge) (km)',
-        'Temperature (°C)', 'Vehicle Age (years)'
-    ]
-
-    data[numerical_cols] = data[numerical_cols].fillna(data[numerical_cols].median())
-
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(data[numerical_cols])
-
-    pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(scaled_data)
-
-    pca_df = pd.DataFrame(data=pca_result, columns=['PCA1', 'PCA2'])
-    pca_df['User Type'] = data['User Type']
-
-    plt.figure(figsize=(8, 6))
-    for user_type in pca_df['User Type'].unique():
-        subset = pca_df[pca_df['User Type'] == user_type]
-        plt.scatter(subset['PCA1'], subset['PCA2'], label=user_type)
-
-    plt.title('PCA Result for User Type')
-    plt.xlabel('PCA1')
-    plt.ylabel('PCA2')
-    plt.legend()
-    plt.grid(True)
-    plt.savefig('static/images/pca_user_type.png')
-    plt.close()
-
-    explained_variance = pca.explained_variance_ratio_
-    return explained_variance
-
-def pca_distribution_analysis(data):
-    numerical_cols = [
-        'Battery Capacity (kWh)', 'Energy Consumed (kWh)', 'Charging Duration (hours)',
-        'Charging Rate (kW)', 'Charging Cost (USD)', 'State of Charge (Start %)',
-        'State of Charge (End %)', 'Distance Driven (since last charge) (km)',
-        'Temperature (°C)', 'Vehicle Age (years)'
-    ]
-
-    data[numerical_cols] = data[numerical_cols].fillna(data[numerical_cols].median())
-
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(data[numerical_cols])
-
-    pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(scaled_data)
-
-    pca_df = pd.DataFrame(data=pca_result, columns=['PCA1', 'PCA2'])
-    pca_df['Vehicle Model'] = data['Vehicle Model']
-    pca_df['User Type'] = data['User Type']
-
-    pca_grouped = pca_df.groupby(['Vehicle Model', 'User Type']).size().unstack(fill_value=0)
-
-    percentage_pca = pca_grouped.div(pca_grouped.sum(axis=1), axis=0) * 100
-    ax = percentage_pca.plot(kind='bar', stacked=True, figsize=(10, 6))
-
-    plt.title('PCA Distribution by Vehicle Model and User Type')
-    plt.xlabel('Vehicle Model')
-    plt.ylabel('Percentage (%)')
-    plt.xticks(rotation=45)
-    plt.legend(title='User Type')
-    plt.grid(True, linestyle='--', alpha=0.6)
-    plt.tight_layout()
-    plt.savefig('static/images/pca_distribution.png')
-    plt.close()
-
-    return pca_grouped
-
-def pca_df_func(data):
-    numerical_cols = [
-        'Battery Capacity (kWh)', 'Energy Consumed (kWh)', 'Charging Duration (hours)',
-        'Charging Rate (kW)', 'Charging Cost (USD)', 'State of Charge (Start %)',
-        'State of Charge (End %)', 'Distance Driven (since last charge) (km)',
-        'Temperature (°C)', 'Vehicle Age (years)'
-    ]
-
-    data[numerical_cols] = data[numerical_cols].fillna(data[numerical_cols].median())
-
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(data[numerical_cols])
-
-    pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(scaled_data)
-
-    pca_df = pd.DataFrame(data=pca_result, columns=['PCA1', 'PCA2'])
-    pca_df['Vehicle Model'] = data['Vehicle Model']
-    pca_df['User Type'] = data['User Type']
-
-    return pca_df
-
-def pca_summary_vehicle_model(pca_df):
-    pca_summary = pca_df.groupby('Vehicle Model')[['PCA1', 'PCA2']].agg(['mean', 'std'])
-    pca_summary.columns = ['PCA1 Mean', 'PCA1 Std', 'PCA2 Mean', 'PCA2 Std']
-    pca_summary = pca_summary.reset_index()  # Mengubah index ke kolom
-    pca_summary = pca_summary.sort_values('Vehicle Model', ascending=True)  # Mengurutkan kolom
-    return pca_summary
-
 def lda_clustering_analysis(data):
     logging.info("Starting LDA-based clustering analysis")
 
