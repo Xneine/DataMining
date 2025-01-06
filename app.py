@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import pandas as pd
 from data_preprocessing import load_and_preprocess
-from analysis import knn_efficiency_comparison,train_lda_model, predict_vehicle_model,pca_df_func, pca_user_type_analysis, pca_distribution_analysis, pca_summary_vehicle_model, energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization, lda_clustering_analysis,pca_clustering_analysis
+from analysis import visualize_prediction_probabilities, knn_efficiency_comparison,train_lda_model, predict_vehicle_model,pca_df_func, pca_user_type_analysis, pca_distribution_analysis, pca_summary_vehicle_model, energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization, lda_clustering_analysis,pca_clustering_analysis
 import os
 
 # Menangani masalah Matplotlib cache directory
@@ -123,11 +123,13 @@ def prediction():
 
         vehicle_models = lda.classes_
         probabilities = class_probabilities[0].tolist()
+        visualize_prediction_probabilities(probabilities, vehicle_models)
         return render_template(
             'prediction.html',
             predicted_model=predicted_model,
             vehicle_models=vehicle_models,
             probabilities=probabilities,
+            image = "static/images/prediction_probabilities.png",
             zip=zip  # Tambahkan zip ke konteks template
         )
 

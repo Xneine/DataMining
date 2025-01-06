@@ -471,6 +471,17 @@ def predict_vehicle_model(lda, scaler, battery_capacity, charging_duration, char
     probabilities = lda.predict_proba(input_data)
     return prediction[0], probabilities
 
+def visualize_prediction_probabilities(probabilities, vehicle_models):
+    plt.figure(figsize=(8, 6))
+    plt.bar(vehicle_models, probabilities, alpha=0.7)
+    plt.xlabel("Vehicle Models")
+    plt.ylabel("Prediction Probability")
+    plt.title("Prediction Probabilities for Vehicle Models")
+    plt.xticks(rotation=45)
+    plt.tight_layout()
+    plt.savefig('static/images/prediction_probabilities.png')
+    plt.close()
+
 # Function to compare efficiency using KNN
 def knn_efficiency_comparison(data, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age):
     # Filter dataset untuk model kendaraan yang sama
@@ -502,7 +513,5 @@ def knn_efficiency_comparison(data, vehicle_model, charging_duration, start_soc,
         'difference': round(predicted_efficiency - filtered_data[target].mean(), 2),
         'vehicle_model': vehicle_model
     }
-
-    return comparison
 
     return comparison
