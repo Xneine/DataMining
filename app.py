@@ -1,7 +1,7 @@
 from flask import Flask, render_template, request
 import pandas as pd
 from data_preprocessing import load_and_preprocess
-from analysis import visualize_prediction_probabilities, knn_efficiency_comparison,train_lda_model, predict_vehicle_model,pca_df_func, pca_user_type_analysis, pca_distribution_analysis, pca_summary_vehicle_model, energy_usage_analysis,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization, lda_clustering_analysis,pca_clustering_analysis
+from analysis import kmeans_efficiency_classification, visualize_prediction_probabilities,train_lda_model, predict_vehicle_model,descriptive_stats, clustering_analysis, leaderboard_pca, leaderboard_lda, ranking_analysis_adjustments, comparative_ranking_visualization, lda_clustering_analysis,pca_clustering_analysis
 import os
 
 # Menangani masalah Matplotlib cache directory
@@ -86,28 +86,6 @@ def clustering():
     lda_data = lda_clustering_analysis(DATA)
     pca_data = pca_clustering_analysis(DATA)
     return render_template('clustering.html', lda_data=lda_data.to_dict(orient='records'),pca_data=pca_data.to_dict(orient='records'), img_path='static/images/lda_clustering.png', img_path2='static/images/pca_clustering.png')
-
-@app.route('/insights')
-def insights():
-    if DATA is None:
-        return "Dataset tidak tersedia. Pastikan file CSV sudah diunduh dan diproses."
-
-    energy_score = energy_usage_analysis(DATA)
-     
-    pca_user_type = pca_user_type_analysis(DATA)
-    pca_distribution = pca_distribution_analysis(DATA)
-    pca_summary_vehicle = pca_summary_vehicle_model(pca_df_func(DATA))
-    
-    return render_template(
-        'insights.html', 
-        energy_score=energy_score, 
-        img_path='static/images/energy_usage.png',
-        pca_user_type_analysis = pca_user_type,
-        pca_distribution_analysis = pca_distribution,
-        pca_summary_vehicle_model = pca_summary_vehicle,
-        img_path2 = 'static/images/pca_user_type.png',
-        img_path3 = 'static/images/pca_distribution.png'
-        )
     
 lda, scaler, accuracy = train_lda_model(DATA)
 @app.route('/prediction', methods=['GET', 'POST'])
@@ -136,20 +114,19 @@ def prediction():
     return render_template('prediction.html', predicted_model=None)
 
 VEHICLE_MODELS = DATA['Vehicle Model'].unique().tolist()
-
 @app.route('/check_efficiency', methods=['GET', 'POST'])
 def check_efficiency():
     if request.method == 'POST':
-        # Ambil input dari pengguna
         vehicle_model = request.form['vehicle_model']
         charging_duration = float(request.form['charging_duration'])
         start_soc = float(request.form['start_soc'])
         end_soc = float(request.form['end_soc'])
         vehicle_age = float(request.form['vehicle_age'])
+        battery_capacity = float(request.form['battery_capacity'])
 
-        # Bandingkan dengan dataset menggunakan KNN
-        efficiency_result = knn_efficiency_comparison(
-            DATA, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age
+        # Klasifikasi efisiensi berdasarkan K-Means
+        efficiency_result = kmeans_efficiency_classification(
+            DATA, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age, battery_capacity
         )
 
         return render_template(
@@ -160,12 +137,15 @@ def check_efficiency():
                 'charging_duration': charging_duration,
                 'start_soc': start_soc,
                 'end_soc': end_soc,
-                'vehicle_age': vehicle_age
+                'vehicle_age': vehicle_age,
+                'battery_capacity': battery_capacity
             },
             vehicle_models=VEHICLE_MODELS
         )
 
     return render_template('check_efficiency.html', efficiency_result=None, vehicle_models=VEHICLE_MODELS)
+
+
 
 if __name__ == "__main__":
     app.run(debug=True)

@@ -54,30 +54,6 @@ def clustering_analysis(data):
     return silhouette_avg
 
 
-def energy_usage_analysis(data):
-    logging.info("Memulai analisis konsumsi energi")
-    data = data.copy()  # Buat salinan
-    model = LinearRegression()
-    X = data[['Vehicle Age (years)']]
-    y = data['Energy Consumed (kWh)']
-    model.fit(X, y)
-    score = model.score(X, y)
-    logging.info(f"Skor regresi linear: {score}")
-
-    # Plot hubungan
-    plt.figure(figsize=(8, 6))
-    plt.scatter(data['Vehicle Age (years)'], data['Energy Consumed (kWh)'], alpha=0.5, label='Data')
-    plt.plot(data['Vehicle Age (years)'], model.predict(X), color='red', label='Regresi Linear')
-    plt.title('Hubungan Usia Kendaraan dan Konsumsi Energi')
-    plt.xlabel('Vehicle Age (years)')
-    plt.ylabel('Energy Consumed (kWh)')
-    plt.legend()
-    plt.savefig('static/images/energy_usage.png')
-    plt.close()
-
-    return score
-
-
 def leaderboard_pca(data):
     logging.info("Menghitung leaderboard PCA")
     data = data.copy()  # Buat salinan
@@ -196,132 +172,29 @@ def comparative_ranking_visualization(df_grouped):
     plt.savefig('static/images/comparative_ranking.png')
     plt.close()
     
-def pca_user_type_analysis(data):
-    numerical_cols = [
-        'Battery Capacity (kWh)', 'Energy Consumed (kWh)', 'Charging Duration (hours)',
-        'Charging Rate (kW)', 'Charging Cost (USD)', 'State of Charge (Start %)',
-        'State of Charge (End %)', 'Distance Driven (since last charge) (km)',
-        'Temperature (°C)', 'Vehicle Age (years)'
-    ]
-
-    data[numerical_cols] = data[numerical_cols].fillna(data[numerical_cols].median())
-
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(data[numerical_cols])
-
-    pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(scaled_data)
-
-    pca_df = pd.DataFrame(data=pca_result, columns=['PCA1', 'PCA2'])
-    pca_df['User Type'] = data['User Type']
-
-    plt.figure(figsize=(8, 6))
-    for user_type in pca_df['User Type'].unique():
-        subset = pca_df[pca_df['User Type'] == user_type]
-        plt.scatter(subset['PCA1'], subset['PCA2'], label=user_type)
-
-    plt.title('PCA Result for User Type')
-    plt.xlabel('PCA1')
-    plt.ylabel('PCA2')
-    plt.legend()
-    plt.grid(True)
-    plt.savefig('static/images/pca_user_type.png')
-    plt.close()
-
-    explained_variance = pca.explained_variance_ratio_
-    return explained_variance
-
-def pca_distribution_analysis(data):
-    numerical_cols = [
-        'Battery Capacity (kWh)', 'Energy Consumed (kWh)', 'Charging Duration (hours)',
-        'Charging Rate (kW)', 'Charging Cost (USD)', 'State of Charge (Start %)',
-        'State of Charge (End %)', 'Distance Driven (since last charge) (km)',
-        'Temperature (°C)', 'Vehicle Age (years)'
-    ]
-
-    data[numerical_cols] = data[numerical_cols].fillna(data[numerical_cols].median())
-
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(data[numerical_cols])
-
-    pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(scaled_data)
-
-    pca_df = pd.DataFrame(data=pca_result, columns=['PCA1', 'PCA2'])
-    pca_df['Vehicle Model'] = data['Vehicle Model']
-    pca_df['User Type'] = data['User Type']
-
-    pca_grouped = pca_df.groupby(['Vehicle Model', 'User Type']).size().unstack(fill_value=0)
-
-    percentage_pca = pca_grouped.div(pca_grouped.sum(axis=1), axis=0) * 100
-    ax = percentage_pca.plot(kind='bar', stacked=True, figsize=(10, 6))
-
-    plt.title('PCA Distribution by Vehicle Model and User Type')
-    plt.xlabel('Vehicle Model')
-    plt.ylabel('Percentage (%)')
-    plt.xticks(rotation=45)
-    plt.legend(title='User Type')
-    plt.grid(True, linestyle='--', alpha=0.6)
-    plt.tight_layout()
-    plt.savefig('static/images/pca_distribution.png')
-    plt.close()
-
-    return pca_grouped
-
-def pca_df_func(data):
-    numerical_cols = [
-        'Battery Capacity (kWh)', 'Energy Consumed (kWh)', 'Charging Duration (hours)',
-        'Charging Rate (kW)', 'Charging Cost (USD)', 'State of Charge (Start %)',
-        'State of Charge (End %)', 'Distance Driven (since last charge) (km)',
-        'Temperature (°C)', 'Vehicle Age (years)'
-    ]
-
-    data[numerical_cols] = data[numerical_cols].fillna(data[numerical_cols].median())
-
-    scaler = StandardScaler()
-    scaled_data = scaler.fit_transform(data[numerical_cols])
-
-    pca = PCA(n_components=2)
-    pca_result = pca.fit_transform(scaled_data)
-
-    pca_df = pd.DataFrame(data=pca_result, columns=['PCA1', 'PCA2'])
-    pca_df['Vehicle Model'] = data['Vehicle Model']
-    pca_df['User Type'] = data['User Type']
-
-    return pca_df
-
-def pca_summary_vehicle_model(pca_df):
-    pca_summary = pca_df.groupby('Vehicle Model')[['PCA1', 'PCA2']].agg(['mean', 'std'])
-    pca_summary.columns = ['PCA1 Mean', 'PCA1 Std', 'PCA2 Mean', 'PCA2 Std']
-    pca_summary = pca_summary.reset_index()  # Mengubah index ke kolom
-    pca_summary = pca_summary.sort_values('Vehicle Model', ascending=True)  # Mengurutkan kolom
-    return pca_summary
-
 def lda_clustering_analysis(data):
-    logging.info("Starting LDA-based clustering analysis")
-
     # Prepare data
-    data = data.copy()
+    data = data.copy()  # Membuat salinan data asli untuk menjaga integritas
     numeric_columns = [
         'Energy Consumed (kWh)', 'Charging Duration (hours)', 'Charging Rate (kW)',
         'Distance Driven (since last charge) (km)', 'Temperature (°C)'
     ]
-    target_column = 'Vehicle Model'
+    target_column = 'Vehicle Model'  # Target kolom untuk LDA
 
     # Drop rows with missing values in required columns
-    data.dropna(subset=numeric_columns + [target_column], inplace=True)
+    data.dropna(subset=numeric_columns + [target_column], inplace=True)  # Hapus baris dengan NaN
 
     # Standardize the data
-    scaler = StandardScaler()
+    scaler = StandardScaler()  # Standarisasi data untuk memastikan mean = 0 dan std dev = 1
     X_scaled = scaler.fit_transform(data[numeric_columns])
 
     # Apply LDA
-    lda = LDA(n_components=2)  # Reduce to 2 dimensions
-    X_lda = lda.fit_transform(X_scaled, data[target_column])
+    lda = LDA(n_components=2)  # Mengurangi dimensi data menjadi 2 komponen utama
+    X_lda = lda.fit_transform(X_scaled, data[target_column])  # LDA berdasarkan Vehicle Model
 
     # Perform KMeans clustering
-    kmeans = KMeans(n_clusters=3, random_state=42)
-    data['Cluster'] = kmeans.fit_predict(X_lda)
+    kmeans = KMeans(n_clusters=3, random_state=42)  # Melakukan clustering dengan 3 cluster
+    data['Cluster'] = kmeans.fit_predict(X_lda)  # Menambahkan hasil prediksi cluster ke data
 
     # Map clusters to meaningful labels
     cluster_labels = {
@@ -329,8 +202,22 @@ def lda_clustering_analysis(data):
         1: 'Medium Efficiency, Large Size',
         2: 'Low Efficiency, Medium Size'
     }
-    data['Cluster Label'] = data['Cluster'].map(cluster_labels)
+    data['Cluster Label'] = data['Cluster'].map(cluster_labels)  # Menambahkan label deskriptif
 
+    # Visualize Clusters
+    plt.figure(figsize=(10, 6))
+    for cluster in range(kmeans.n_clusters):  # Iterasi setiap cluster
+        cluster_points = X_lda[data['Cluster'] == cluster]  # Pilih titik data untuk cluster tersebut
+        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f'Cluster {cluster}')
+
+    # Menambahkan elemen visualisasi
+    plt.title('Vehicle Model Clustering with LDA')  # Judul plot
+    plt.xlabel('LDA1')  # Label sumbu X
+    plt.ylabel('LDA2')  # Label sumbu Y
+    plt.legend()  # Menambahkan legenda
+    plt.savefig('static/images/lda_clustering.png')  # Menyimpan grafik scatter
+    plt.close()
+    
     # Aggregate original data
     aggregation_rules = {
         "Energy Consumed (kWh)": "mean",
@@ -339,35 +226,18 @@ def lda_clustering_analysis(data):
         "Distance Driven (since last charge) (km)": "mean",
         "Temperature (°C)": "mean"
     }
+
+    # Mengelompokkan data berdasarkan Vehicle Model dan menghitung rata-rata
     aggregated_data = data.groupby("Vehicle Model").agg(aggregation_rules).reset_index()
 
     # Merge aggregated data with clustering labels
-    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()
+    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()  # Ambil informasi cluster unik
     lda_data = pd.merge(aggregated_data, cluster_info, on="Vehicle Model", how="left")
-
-    # Visualize Clusters
-    plt.figure(figsize=(10, 6))
-    for cluster in range(kmeans.n_clusters):
-        cluster_points = X_lda[data['Cluster'] == cluster]
-        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f'Cluster {cluster}')
-
-    plt.title('Vehicle Model Clustering with LDA')
-    plt.xlabel('LDA1')
-    plt.ylabel('LDA2')
-    plt.legend()
-    plt.savefig('static/images/lda_clustering.png')
-    plt.close()
-    lda_data = lda_data.round({
-    "Energy Consumed (kWh)": 1,
-    "Charging Duration (hours)": 1,
-    "Charging Rate (kW)": 1,
-    "Distance Driven (since last charge) (km)": 1,
-    "Temperature (°C)": 1
-    })
+    # Menghapus duplikasi jika ada
     lda_data = lda_data.drop_duplicates(subset="Vehicle Model")
 
-    logging.info("LDA clustering analysis completed and saved as 'lda_clustering.png'")
-    return lda_data
+    return lda_data  # Mengembalikan data hasil analisis
+
 
 def pca_clustering_analysis(data):
     # Step 1: Standardize the Data
@@ -375,19 +245,25 @@ def pca_clustering_analysis(data):
         'Energy Consumed (kWh)', 'Charging Duration (hours)', 'Charging Rate (kW)',
         'Distance Driven (since last charge) (km)', 'Temperature (°C)'
     ]
-    data.dropna(subset=numeric_columns, inplace=True)  # Drop rows with missing numeric values
+
+    # Menghapus baris yang memiliki nilai NaN pada kolom numerik
+    data.dropna(subset=numeric_columns, inplace=True)
+
+    # Standarisasi data numerik
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(data[numeric_columns])
 
     # Step 2: Apply PCA
-    pca = PCA(n_components=2)  # Reduce to 2 dimensions for visualization and clustering
+    # Mengurangi dimensi data menjadi 2 komponen utama
+    pca = PCA(n_components=2)
     X_pca = pca.fit_transform(X_scaled)
 
     # Step 3: K-Means Clustering
-    kmeans = KMeans(n_clusters=3, random_state=42)  # Adjust the number of clusters as needed
+    # Melakukan clustering menggunakan algoritma K-Means (dengan 3 cluster)
+    kmeans = KMeans(n_clusters=3, random_state=42)
     data['Cluster'] = kmeans.fit_predict(X_pca)
 
-    # Map clusters to meaningful labels (optional)
+    # Mapping cluster ke label yang lebih bermakna (opsional)
     cluster_labels = {
         0: 'High Efficiency, Small Size',
         1: 'Medium Efficiency, Large Size',
@@ -395,47 +271,46 @@ def pca_clustering_analysis(data):
     }
     data['Cluster Label'] = data['Cluster'].map(cluster_labels)
 
-    # Step 4: Aggregate Data (Optional Step for Analysis)
-    aggregation_rules = {
-        "Energy Consumed (kWh)": "mean",  # Average energy consumed
-        "Charging Duration (hours)": "mean",  # Average charging duration
-        "Charging Rate (kW)": "mean",  # Average charging rate
-        "Distance Driven (since last charge) (km)": "mean",  # Average distance driven
-        "Temperature (°C)": "mean"  # Average temperature
-    }
-    aggregated_data = data.groupby("Vehicle Model").agg(aggregation_rules).reset_index()
-
-    # Merge aggregated data with cluster labels
-    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()
-    pca_data = pd.merge(aggregated_data, cluster_info, on="Vehicle Model", how="left")
-
-    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
-
     # Step 5: Visualize PCA Clusters
     plt.figure(figsize=(10, 6))
     for cluster in range(kmeans.n_clusters):
+        # Memilih titik data untuk setiap cluster
         cluster_points = X_pca[data['Cluster'] == cluster]
         plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f'Cluster {cluster}')
 
+    # Menambahkan elemen visualisasi
     plt.title('Vehicle Model Clustering with PCA')
     plt.xlabel('PCA1')
     plt.ylabel('PCA2')
     plt.legend()
-    plt.savefig('static/images/pca_clustering.png')
+    plt.savefig('static/images/pca_clustering.png')  # Menyimpan grafik scatter
     plt.close()
 
-    pca_data = pca_data.round({
-    "Energy Consumed (kWh)": 1,
-    "Charging Duration (hours)": 1,
-    "Charging Rate (kW)": 1,
-    "Distance Driven (since last charge) (km)": 1,
-    "Temperature (°C)": 1
-    })
-    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
-    # Step 6: Display Combined Data
-    print(pca_data)
+    # Step 6: Aggregate Data (Optional Step for Analysis)
+    # Menentukan aturan agregasi untuk setiap kolom numerik
+    aggregation_rules = {
+        "Energy Consumed (kWh)": "mean",
+        "Charging Duration (hours)": "mean",
+        "Charging Rate (kW)": "mean",
+        "Distance Driven (since last charge) (km)": "mean",
+        "Temperature (°C)": "mean"
+    }
 
-    return pca_data
+    # Mengelompokkan data berdasarkan Vehicle Model dan menghitung rata-rata
+    aggregated_data = data.groupby("Vehicle Model").agg(aggregation_rules).reset_index()
+
+    # Menggabungkan data agregat dengan informasi cluster
+    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()
+    pca_data = pd.merge(aggregated_data, cluster_info, on="Vehicle Model", how="left")
+
+    # Menghapus duplikasi jika ada
+    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
+
+    # Menghapus duplikasi berdasarkan Vehicle Model (jika ada)
+    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
+
+    return pca_data  # Mengembalikan data hasil analisis
+
 
 
 # Fungsi untuk training LDA untuk fitur prediksi mobil
@@ -497,36 +372,77 @@ def visualize_prediction_probabilities(probabilities, vehicle_models):
     plt.savefig('static/images/prediction_probabilities.png') #save gambar untuk dikirim ke frontend
     plt.close() #close plt untuk save memory
 
-# Function to compare efficiency using KNN
-def knn_efficiency_comparison(data, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age):
+# Function to classify efficiency into clusters (Low, Medium, High) with Battery Capacity and visualization
+def kmeans_efficiency_classification(data, vehicle_model, charging_duration, start_soc, end_soc, vehicle_age, battery_capacity):
     # Filter dataset untuk model kendaraan yang sama
     filtered_data = data[data['Vehicle Model'] == vehicle_model]
 
     # Variabel input dan target
-    features = ['Charging Duration (hours)', 'State of Charge (Start %)', 'State of Charge (End %)', 'Vehicle Age (years)']
-    target = 'Charging Duration (hours)'
+    features = ['Charging Duration (hours)', 'State of Charge (Start %)', 'State of Charge (End %)', 'Vehicle Age (years)', 'Battery Capacity (kWh)']
 
-    # Data preprocessing
+    # Hitung efisiensi dataset dengan rumus: (SOC End - SOC Start) / (Charging Duration * Battery Capacity)
+    filtered_data['Efficiency'] = (
+        (filtered_data['State of Charge (End %)'] - filtered_data['State of Charge (Start %)']) /
+        (filtered_data['Charging Duration (hours)'] * (1 + 0.05 * filtered_data['Vehicle Age (years)']) * filtered_data['Battery Capacity (kWh)'])
+    ) * 100  # Skalakan ke 100% (raw efficiency)
+
+    # Data preprocessing: Ambil fitur input
     X = filtered_data[features]
-    y = filtered_data[target]
 
+    # Standarisasi data agar fitur memiliki skala yang sama
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(X)
 
-    # Model KNN
-    knn = KNeighborsRegressor(n_neighbors=3)
-    knn.fit(X_scaled, y)
+    # Gunakan model K-Means untuk mengelompokkan data berdasarkan efisiensi
+    kmeans = KMeans(n_clusters=3, random_state=42)
+    filtered_data['Cluster'] = kmeans.fit_predict(X_scaled)
 
-    # Input user
-    user_input = scaler.transform([[charging_duration, start_soc, end_soc, vehicle_age]])
-    predicted_efficiency = knn.predict(user_input)[0]
+    # Beri label kategori ke setiap cluster
+    cluster_labels = {0: 'Low', 1: 'Medium', 2: 'High'}
+    cluster_efficiency = filtered_data.groupby('Cluster')['Efficiency'].mean().sort_values().index
+    for i, cluster in enumerate(cluster_efficiency):
+        cluster_labels[cluster] = ['Low', 'Medium', 'High'][i]
+    filtered_data['Efficiency Category'] = filtered_data['Cluster'].map(cluster_labels)
 
-    # Output
+    # Buat input user berdasarkan parameter yang dimasukkan
+    user_input = pd.DataFrame([[charging_duration, start_soc, end_soc, vehicle_age, battery_capacity]], columns=features)
+
+    # Standarisasi input user
+    user_scaled = scaler.transform(user_input)
+
+    # Prediksi cluster input user menggunakan model K-Means
+    user_cluster = kmeans.predict(user_scaled)[0]
+
+    # Tentukan kategori efisiensi untuk input user
+    user_efficiency_category = cluster_labels[user_cluster]
+
+    # Visualisasi clustering
+    plt.figure(figsize=(10, 6))
+    for cluster in range(3):
+        cluster_points = filtered_data[filtered_data['Cluster'] == cluster]
+        plt.scatter(
+            cluster_points['Charging Duration (hours)'],
+            cluster_points['Efficiency'],
+            label=f"Cluster {cluster} ({cluster_labels[cluster]})"
+        )
+    plt.scatter(
+        charging_duration, 
+        (end_soc - start_soc) / (charging_duration * (1 + 0.05 * vehicle_age) * battery_capacity) * 100,
+        color='red', label='User Input', edgecolors='black', linewidths=2, s=100
+    )
+    plt.title("Clustering Visualization with Battery Capacity")
+    plt.xlabel("Charging Duration (hours)")
+    plt.ylabel("Efficiency (%)")
+    plt.legend()
+    plt.tight_layout()
+    plt.savefig('static/images/clustering_visualization.png')
+    plt.close()
+
+    # Output perbandingan
     comparison = {
-        'predicted_efficiency': round(predicted_efficiency, 2),
-        'dataset_avg_efficiency': round(filtered_data[target].mean(), 2),
-        'difference': round(predicted_efficiency - filtered_data[target].mean(), 2),
-        'vehicle_model': vehicle_model
+        'vehicle_model': vehicle_model,
+        'efficiency_category': user_efficiency_category,
+        'visualization_path': 'static/images/clustering_visualization.png'
     }
 
     return comparison
