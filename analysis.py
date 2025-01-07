@@ -173,30 +173,28 @@ def comparative_ranking_visualization(df_grouped):
     plt.close()
     
 def lda_clustering_analysis(data):
-    logging.info("Starting LDA-based clustering analysis")
-
     # Prepare data
-    data = data.copy()
+    data = data.copy()  # Membuat salinan data asli untuk menjaga integritas
     numeric_columns = [
         'Energy Consumed (kWh)', 'Charging Duration (hours)', 'Charging Rate (kW)',
         'Distance Driven (since last charge) (km)', 'Temperature (°C)'
     ]
-    target_column = 'Vehicle Model'
+    target_column = 'Vehicle Model'  # Target kolom untuk LDA
 
     # Drop rows with missing values in required columns
-    data.dropna(subset=numeric_columns + [target_column], inplace=True)
+    data.dropna(subset=numeric_columns + [target_column], inplace=True)  # Hapus baris dengan NaN
 
     # Standardize the data
-    scaler = StandardScaler()
+    scaler = StandardScaler()  # Standarisasi data untuk memastikan mean = 0 dan std dev = 1
     X_scaled = scaler.fit_transform(data[numeric_columns])
 
     # Apply LDA
-    lda = LDA(n_components=2)  # Reduce to 2 dimensions
-    X_lda = lda.fit_transform(X_scaled, data[target_column])
+    lda = LDA(n_components=2)  # Mengurangi dimensi data menjadi 2 komponen utama
+    X_lda = lda.fit_transform(X_scaled, data[target_column])  # LDA berdasarkan Vehicle Model
 
     # Perform KMeans clustering
-    kmeans = KMeans(n_clusters=3, random_state=42)
-    data['Cluster'] = kmeans.fit_predict(X_lda)
+    kmeans = KMeans(n_clusters=3, random_state=42)  # Melakukan clustering dengan 3 cluster
+    data['Cluster'] = kmeans.fit_predict(X_lda)  # Menambahkan hasil prediksi cluster ke data
 
     # Map clusters to meaningful labels
     cluster_labels = {
@@ -204,8 +202,22 @@ def lda_clustering_analysis(data):
         1: 'Medium Efficiency, Large Size',
         2: 'Low Efficiency, Medium Size'
     }
-    data['Cluster Label'] = data['Cluster'].map(cluster_labels)
+    data['Cluster Label'] = data['Cluster'].map(cluster_labels)  # Menambahkan label deskriptif
 
+    # Visualize Clusters
+    plt.figure(figsize=(10, 6))
+    for cluster in range(kmeans.n_clusters):  # Iterasi setiap cluster
+        cluster_points = X_lda[data['Cluster'] == cluster]  # Pilih titik data untuk cluster tersebut
+        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f'Cluster {cluster}')
+
+    # Menambahkan elemen visualisasi
+    plt.title('Vehicle Model Clustering with LDA')  # Judul plot
+    plt.xlabel('LDA1')  # Label sumbu X
+    plt.ylabel('LDA2')  # Label sumbu Y
+    plt.legend()  # Menambahkan legenda
+    plt.savefig('static/images/lda_clustering.png')  # Menyimpan grafik scatter
+    plt.close()
+    
     # Aggregate original data
     aggregation_rules = {
         "Energy Consumed (kWh)": "mean",
@@ -214,35 +226,18 @@ def lda_clustering_analysis(data):
         "Distance Driven (since last charge) (km)": "mean",
         "Temperature (°C)": "mean"
     }
+
+    # Mengelompokkan data berdasarkan Vehicle Model dan menghitung rata-rata
     aggregated_data = data.groupby("Vehicle Model").agg(aggregation_rules).reset_index()
 
     # Merge aggregated data with clustering labels
-    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()
+    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()  # Ambil informasi cluster unik
     lda_data = pd.merge(aggregated_data, cluster_info, on="Vehicle Model", how="left")
-
-    # Visualize Clusters
-    plt.figure(figsize=(10, 6))
-    for cluster in range(kmeans.n_clusters):
-        cluster_points = X_lda[data['Cluster'] == cluster]
-        plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f'Cluster {cluster}')
-
-    plt.title('Vehicle Model Clustering with LDA')
-    plt.xlabel('LDA1')
-    plt.ylabel('LDA2')
-    plt.legend()
-    plt.savefig('static/images/lda_clustering.png')
-    plt.close()
-    lda_data = lda_data.round({
-    "Energy Consumed (kWh)": 1,
-    "Charging Duration (hours)": 1,
-    "Charging Rate (kW)": 1,
-    "Distance Driven (since last charge) (km)": 1,
-    "Temperature (°C)": 1
-    })
+    # Menghapus duplikasi jika ada
     lda_data = lda_data.drop_duplicates(subset="Vehicle Model")
 
-    logging.info("LDA clustering analysis completed and saved as 'lda_clustering.png'")
-    return lda_data
+    return lda_data  # Mengembalikan data hasil analisis
+
 
 def pca_clustering_analysis(data):
     # Step 1: Standardize the Data
@@ -250,19 +245,25 @@ def pca_clustering_analysis(data):
         'Energy Consumed (kWh)', 'Charging Duration (hours)', 'Charging Rate (kW)',
         'Distance Driven (since last charge) (km)', 'Temperature (°C)'
     ]
-    data.dropna(subset=numeric_columns, inplace=True)  # Drop rows with missing numeric values
+
+    # Menghapus baris yang memiliki nilai NaN pada kolom numerik
+    data.dropna(subset=numeric_columns, inplace=True)
+
+    # Standarisasi data numerik
     scaler = StandardScaler()
     X_scaled = scaler.fit_transform(data[numeric_columns])
 
     # Step 2: Apply PCA
-    pca = PCA(n_components=2)  # Reduce to 2 dimensions for visualization and clustering
+    # Mengurangi dimensi data menjadi 2 komponen utama
+    pca = PCA(n_components=2)
     X_pca = pca.fit_transform(X_scaled)
 
     # Step 3: K-Means Clustering
-    kmeans = KMeans(n_clusters=3, random_state=42)  # Adjust the number of clusters as needed
+    # Melakukan clustering menggunakan algoritma K-Means (dengan 3 cluster)
+    kmeans = KMeans(n_clusters=3, random_state=42)
     data['Cluster'] = kmeans.fit_predict(X_pca)
 
-    # Map clusters to meaningful labels (optional)
+    # Mapping cluster ke label yang lebih bermakna (opsional)
     cluster_labels = {
         0: 'High Efficiency, Small Size',
         1: 'Medium Efficiency, Large Size',
@@ -270,47 +271,46 @@ def pca_clustering_analysis(data):
     }
     data['Cluster Label'] = data['Cluster'].map(cluster_labels)
 
-    # Step 4: Aggregate Data (Optional Step for Analysis)
-    aggregation_rules = {
-        "Energy Consumed (kWh)": "mean",  # Average energy consumed
-        "Charging Duration (hours)": "mean",  # Average charging duration
-        "Charging Rate (kW)": "mean",  # Average charging rate
-        "Distance Driven (since last charge) (km)": "mean",  # Average distance driven
-        "Temperature (°C)": "mean"  # Average temperature
-    }
-    aggregated_data = data.groupby("Vehicle Model").agg(aggregation_rules).reset_index()
-
-    # Merge aggregated data with cluster labels
-    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()
-    pca_data = pd.merge(aggregated_data, cluster_info, on="Vehicle Model", how="left")
-
-    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
-
     # Step 5: Visualize PCA Clusters
     plt.figure(figsize=(10, 6))
     for cluster in range(kmeans.n_clusters):
+        # Memilih titik data untuk setiap cluster
         cluster_points = X_pca[data['Cluster'] == cluster]
         plt.scatter(cluster_points[:, 0], cluster_points[:, 1], label=f'Cluster {cluster}')
 
+    # Menambahkan elemen visualisasi
     plt.title('Vehicle Model Clustering with PCA')
     plt.xlabel('PCA1')
     plt.ylabel('PCA2')
     plt.legend()
-    plt.savefig('static/images/pca_clustering.png')
+    plt.savefig('static/images/pca_clustering.png')  # Menyimpan grafik scatter
     plt.close()
 
-    pca_data = pca_data.round({
-    "Energy Consumed (kWh)": 1,
-    "Charging Duration (hours)": 1,
-    "Charging Rate (kW)": 1,
-    "Distance Driven (since last charge) (km)": 1,
-    "Temperature (°C)": 1
-    })
-    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
-    # Step 6: Display Combined Data
-    print(pca_data)
+    # Step 6: Aggregate Data (Optional Step for Analysis)
+    # Menentukan aturan agregasi untuk setiap kolom numerik
+    aggregation_rules = {
+        "Energy Consumed (kWh)": "mean",
+        "Charging Duration (hours)": "mean",
+        "Charging Rate (kW)": "mean",
+        "Distance Driven (since last charge) (km)": "mean",
+        "Temperature (°C)": "mean"
+    }
 
-    return pca_data
+    # Mengelompokkan data berdasarkan Vehicle Model dan menghitung rata-rata
+    aggregated_data = data.groupby("Vehicle Model").agg(aggregation_rules).reset_index()
+
+    # Menggabungkan data agregat dengan informasi cluster
+    cluster_info = data[["Vehicle Model", "Cluster Label"]].drop_duplicates()
+    pca_data = pd.merge(aggregated_data, cluster_info, on="Vehicle Model", how="left")
+
+    # Menghapus duplikasi jika ada
+    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
+
+    # Menghapus duplikasi berdasarkan Vehicle Model (jika ada)
+    pca_data = pca_data.drop_duplicates(subset="Vehicle Model")
+
+    return pca_data  # Mengembalikan data hasil analisis
+
 
 # Function to train LDA model
 def train_lda_model(data):
